@@ -9,8 +9,20 @@ class Player : public QObject
 {
 		Q_OBJECT
 	public:
-		explicit Player(unsigned int maxCards = 0, QObject *parent = nullptr);
+		explicit Player(uint playerIndex = 0, uint maxCards = 0, QObject *parent = nullptr);
 		~Player();
+
+		Q_PROPERTY(uint m_playerIndex
+		           READ getPlayerIndex)
+		uint getPlayerIndex() const;
+
+		Q_PROPERTY(uint m_maxNumOfCardsInHand
+		           READ getPlayerMaxCards)
+		uint getPlayerMaxCards() const;
+
+		Q_PROPERTY(uint m_numOfCardsInHand
+		           READ getPlayerNumOfCards)
+		uint getPlayerNumOfCards() const;
 
 		/******************************************************************************************************************
 		 * Adds a card to this player's hand.
@@ -25,7 +37,7 @@ class Player : public QObject
 		 *	m_numOfCardsInHand: Incremented if a card is added to this hand.
 		 *
 		 * Outputs:
-		 *	Returns the index into the array of cards for the hand.
+		 *	Returns the index into the player's hand to which the card was added.
 		 *	if no empty slot is found, returns m_MaxNumOfCardsInHand, which is an invalid index.
 		 *
 		 * Exceptions:
@@ -34,7 +46,7 @@ class Player : public QObject
 		 *	-	Throws a runtime error if we have no room in the hand for the new card.
 		 * Notes:
 		 ******************************************************************************************************************/
-		void AddCardToHand(Card *card);
+		uint AddCardToHand(Card *card);
 
 		/******************************************************************************************************************
 		 * Removes a card from this player's hand.
@@ -77,8 +89,9 @@ class Player : public QObject
 	public slots:
 
 	private:
-		unsigned int m_numOfCardsInHand;
-		unsigned int m_maxNumOfCardsInHand;
+		uint m_playerIndex;			// Index we'll pass to the GUI to add cards to the hand
+		uint m_numOfCardsInHand;
+		uint m_maxNumOfCardsInHand;
 		Card **m_hand;					// Array of card ptrs for the cards in the hand
 
 		/******************************************************************************************************************

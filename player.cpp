@@ -1,10 +1,10 @@
 #include "card.h"
 #include "player.h"
 
-Player::Player(unsigned int maxCards, QObject *parent) : QObject(parent)
+Player::Player(uint playerIndex, uint maxCards, QObject *parent) : QObject(parent)
 {
 	m_numOfCardsInHand = 0;
-
+	m_playerIndex = playerIndex;
 	// Create an array of Card ptrs, to keep track of the cards in the hand
 	m_maxNumOfCardsInHand = maxCards;
 	m_hand = new Card *[m_maxNumOfCardsInHand];
@@ -21,14 +21,31 @@ Player::~Player()
 
 }
 
-void Player::AddCardToHand(Card *card)
+uint Player::getPlayerIndex() const
 {
+	return m_playerIndex;
+}
+
+uint Player::getPlayerMaxCards() const
+{
+	return m_maxNumOfCardsInHand;
+}
+
+uint Player::getPlayerNumOfCards() const
+{
+	return m_numOfCardsInHand;
+}
+
+uint Player::AddCardToHand(Card *card)
+{
+	uint cardIndex = m_maxNumOfCardsInHand;	// This is an invalid index value. We'll set it to a valid one if successful.
+
 	if (m_numOfCardsInHand < m_maxNumOfCardsInHand)
 	{	// We have room in the hand for another card
-		unsigned int handIndex = FindEmptyHandSlot();
-		if (handIndex < m_maxNumOfCardsInHand)
+		cardIndex = FindEmptyHandSlot();
+		if (cardIndex < m_maxNumOfCardsInHand)
 		{	// We found an entry to deal the card
-			m_hand[handIndex] = card;
+			m_hand[cardIndex] = card;
 		}
 		else
 		{	// Logic error. Our card pointers and num of cards in the hand are out of sync.
@@ -39,6 +56,9 @@ void Player::AddCardToHand(Card *card)
 	{	// no room to deal another card to this player
 		throw runtime_error("AddCardToHand: Trying to add too many cards to the hand.");
 	}
+
+	// return the location in the hand we added the card to
+	return cardIndex;
 }
 
 void Player::RemoveCardFromHand(unsigned int cardIndex)

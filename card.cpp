@@ -1,5 +1,9 @@
-#include "card.h"
 #include <QRect>
+#include <QStringBuilder>
+
+#include "card.h"
+
+using namespace std;
 
 Card::Card(Card::Pip pip, Card::Suit suit, Card::Orientation orientation, unsigned int rotation, QObject *parent)
 {
@@ -7,8 +11,9 @@ Card::Card(Card::Pip pip, Card::Suit suit, Card::Orientation orientation, unsign
 	this->m_pip = pip;
 	this->m_orientation = orientation;
 	this->m_rotation = rotation;
-	this->m_cardImage = QImage(getCardImagePath(pip, suit));
-
+	cout << "Card " << Print() << ", imagePath=" << getCardImagePath(pip, suit) << endl;
+	QString pathStr = QString::fromStdString(getCardImagePath(pip, suit));
+	this->m_cardImage = QImage(pathStr);
 }
 
 Card::~Card()
@@ -59,9 +64,9 @@ QImage Card::getCardImage()
 }
 
 
-QString Card::getCardImagePath(Card::Pip pip, Card::Suit suit)
+string Card::getCardImagePath(Card::Pip pip, Card::Suit suit)
 {
-	QString imagePath = basePath + resourcePath[pip][suit];
+	string imagePath = basePath + resourcePath[pip][suit];
 	return imagePath;
 }
 

@@ -30,12 +30,26 @@ class gameLogic_500 : public QObject
 		 * Inputs:	None
 		 *
 		 * Outputs:
+		 *	None directly. Calls "DealCards" to update the class variables.
+		 *
+		 * Notes:
+		 ******************************************************************************************************************/
+		void DealCards();
+
+		/******************************************************************************************************************
+		 * For the player and car index specified, gets the next card off the deck, adds it to the player's hand, and
+		 * updates the GUI.
+		 *
+		 * Inputs:
+		 *	player:	the player to which we're adding the card
+		 *
+		 * Outputs:
 		 *	m_player[x]->m_card:	Updated hands for each player
 		 *	m_kitty->m_card:	Updated hand for the kitty
 		 *
 		 * Notes:
 		 ******************************************************************************************************************/
-		void DealCards();
+		void AddCardToPlayer(Player *player);
 
 		void ReturnAllCards();
 

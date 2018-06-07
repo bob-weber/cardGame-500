@@ -169,7 +169,7 @@ void Deck::Print()
 {
 	for (unsigned int deckIndex = 0; deckIndex < m_totalCardCount; deckIndex++)
 	{
-		m_deck[deckIndex]->Print();
+		// m_deck[deckIndex]->Print();
 		cout << m_deck[deckIndex]->Print() << ", ";
 	}
 	cout << endl;
