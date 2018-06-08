@@ -10,7 +10,14 @@
 - [ ] Pop-up after each hand, indicating:
   * score for that round
   * total game score
-* Handle completing a game
+- [ ] Handle completing a game
+
+# Phase 0.5
+- [ ] Add testing for card class
+- [ ] Add testing for deck class
+- [ ] Add testing for player class
+- [ ] Add testing for team class
+- [ ] Add testing for game logic class
 
 # Phase 1
 * Ability to play against the computer
