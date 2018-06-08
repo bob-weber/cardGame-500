@@ -3,6 +3,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "gamelogic_500.h"
+#include "clickableqlabel.h"
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -29,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	 * The "finished" signal from the game thread will that thread's "deleteLater" function.
 	 */
 	connect(gameLogic, SIGNAL(finished()), gameLogicThread, SLOT(quit()));
+
 	connect(gameLogic, SIGNAL (finished()), gameLogic, SLOT (deleteLater()));
 	connect(gameLogicThread, SIGNAL (finished()), gameLogicThread, SLOT (deleteLater()));
 
@@ -39,6 +41,57 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(gameLogic, SIGNAL(PlayerActionChanged(uint,QString)), this, SLOT(setPlayerAction(uint,QString)));
 	connect(gameLogic, SIGNAL(PlayerCardChanged(uint, uint, QImage)), this, SLOT(setPlayerCardImage(uint,uint,QImage)));
 	connect(ui->pb_Deal, SIGNAL(clicked()), gameLogic, SLOT(Deal()));
+
+	// Connect label clicks to our handler
+	connect(ui->lbl_P1C1, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P1C2, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P1C3, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P1C4, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P1C5, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P1C6, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P1C7, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P1C8, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P1C9, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P1C10, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+
+	connect(ui->lbl_P2C1, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P2C2, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P2C3, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P2C4, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P2C5, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P2C6, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P2C7, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P2C8, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P2C9, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P2C10, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+
+	connect(ui->lbl_P3C1, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P3C2, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P3C3, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P3C4, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P3C5, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P3C6, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P3C7, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P3C8, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P3C9, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P3C10, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+
+	connect(ui->lbl_P4C1, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P4C2, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P4C3, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P4C4, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P4C5, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P4C6, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P4C7, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P4C8, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P4C9, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_P4C10, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+
+	connect(ui->lbl_KittyC1, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_KittyC2, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_KittyC3, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_KittyC4, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
+	connect(ui->lbl_KittyC5, SIGNAL(clicked(uint,uint)), gameLogic, SLOT(CardClicked(uint,uint)));
 
 	// Start the game thread, which will call PlayGame, due to the signal/slot connection.
 	gameLogicThread->start();
@@ -111,4 +164,5 @@ void MainWindow::setPlayerCardImage(uint player, uint cardIndex, QImage image)
 	}
 	// else, ignore this request
 }
+
 

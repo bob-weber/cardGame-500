@@ -1,17 +1,8 @@
 #include "card.h"
 #include "player.h"
 
-Player::Player(uint playerIndex, uint maxCards, QObject *parent) : QObject(parent)
+Player::Player(QObject *parent) : QObject(parent)
 {
-	m_numOfCardsInHand = 0;
-	m_playerIndex = playerIndex;
-	// Create an array of Card ptrs, to keep track of the cards in the hand
-	m_maxNumOfCardsInHand = maxCards;
-	m_hand = new Card *[m_maxNumOfCardsInHand];
-	for (unsigned int i = 0; i < m_maxNumOfCardsInHand; i++)
-	{
-		m_hand[i] = nullptr;
-	}
 }
 
 Player::~Player()
@@ -21,29 +12,52 @@ Player::~Player()
 
 }
 
-uint Player::getPlayerIndex() const
+void Player::SetID(uint ID)
 {
-	return m_playerIndex;
+	this->m_ID = ID;
 }
 
-uint Player::getPlayerMaxCards() const
+uint Player::GetID() const
 {
-	return m_maxNumOfCardsInHand;
+	return this->m_ID;
 }
 
-uint Player::getPlayerNumOfCards() const
+uint Player::GetMaxNumOfCards() const
 {
-	return m_numOfCardsInHand;
+	return this->m_maxNumOfCards;
+}
+
+void Player::SetMaxNumOfCards(uint numOfCards)
+{
+	this->m_maxNumOfCards = numOfCards;
+
+	// Now that we know how many cards we have,	allocate an array of cards
+	// Initialize them all to null, as no cards have been dealt yet.
+	this->m_hand = new Card *[m_maxNumOfCards];
+	for (uint cardIndex = 0; cardIndex < m_maxNumOfCards; cardIndex++)
+	{
+		m_hand[cardIndex] = nullptr;
+	}
+}
+
+uint Player::GetCurrentNumOfCards() const
+{
+	return this->m_currentNumOfCards;
+}
+
+void Player::SetCurrentNumOfCards(uint numOfCards)
+{
+	this->m_currentNumOfCards = numOfCards;
 }
 
 uint Player::AddCardToHand(Card *card)
 {
-	uint cardIndex = m_maxNumOfCardsInHand;	// This is an invalid index value. We'll set it to a valid one if successful.
+	uint cardIndex = m_maxNumOfCards;	// This is an invalid index value. We'll set it to a valid one if successful.
 
-	if (m_numOfCardsInHand < m_maxNumOfCardsInHand)
+	if (m_currentNumOfCards < m_maxNumOfCards)
 	{	// We have room in the hand for another card
 		cardIndex = FindEmptyHandSlot();
-		if (cardIndex < m_maxNumOfCardsInHand)
+		if (cardIndex < m_maxNumOfCards)
 		{	// We found an entry to deal the card
 			m_hand[cardIndex] = card;
 		}
@@ -68,9 +82,9 @@ void Player::RemoveCardFromHand(unsigned int cardIndex)
 	{	// This card slot is not empty
 		card = m_hand[cardIndex];
 		m_hand[cardIndex] = nullptr;
-		if (m_numOfCardsInHand > 0)
+		if (m_currentNumOfCards > 0)
 		{
-			--m_numOfCardsInHand;
+			--m_currentNumOfCards;
 		}
 		else
 		{
@@ -85,17 +99,23 @@ void Player::RemoveCardFromHand(unsigned int cardIndex)
 
 void Player::RemoveAllCardsFromHand()
 {
-	for (unsigned int cardIndex = 0; cardIndex < m_maxNumOfCardsInHand; ++cardIndex)
+	for (unsigned int cardIndex = 0; cardIndex < m_maxNumOfCards; ++cardIndex)
 	{
 		m_hand[cardIndex] = nullptr;
 	}
-	m_numOfCardsInHand = 0;
+	m_currentNumOfCards = 0;
+}
+
+
+Card *Player::GetCard(uint cardIndex)
+{
+	return m_hand[cardIndex];
 }
 
 unsigned int Player::FindEmptyHandSlot()
 {
-	unsigned int emptySlot = m_maxNumOfCardsInHand;
-	for (unsigned int handIndex = 0; handIndex < m_maxNumOfCardsInHand; handIndex++)
+	unsigned int emptySlot = m_maxNumOfCards;
+	for (unsigned int handIndex = 0; handIndex < m_maxNumOfCards; handIndex++)
 	{
 		if (m_hand[handIndex] == nullptr)
 		{	// open slot

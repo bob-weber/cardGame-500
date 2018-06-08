@@ -26,45 +26,50 @@ class Card : public QObject
 		 */
 		enum Suit { SUIT_SPADE = 0, SUIT_CLUB, SUIT_DIAMOND, SUIT_HEART, SUIT_NUMBER_OF_SUITS };
 		Q_ENUM(Suit)
-		Q_PROPERTY(Suit suit READ getSuit)
-		Suit getSuit() const;
+		Q_PROPERTY(Suit suit READ GetSuit)
+		Suit GetSuit() const;
 
 		enum Pip { PIP_2 = 0, PIP_3, PIP_4, PIP_5, PIP_6, PIP_7, PIP_8, PIP_9, PIP_10,
 			         PIP_JACK, PIP_QUEEN, PIP_KING, PIP_ACE, PIP_JOKER, PIP_NUMBER_OF_PIPS };
 		Q_ENUM(Pip)
-		Q_PROPERTY(Pip pip READ getPip)
-		Pip getPip() const;
+		Q_PROPERTY(Pip pip READ GetPip)
+		Pip GetPip() const;
 
 		/* Orientation properties. Can be read and written.
 		 */
 		enum Orientation { FACE_UP, FACE_DOWN };
 		Q_ENUM(Orientation)
 		Q_PROPERTY(Orientation orientation
-		           READ getOrientation
-		           WRITE setOrientation
-		           NOTIFY orientationChanged)
-		Orientation getOrientation() const;
-		void setOrientation(Orientation orientation);
+		           READ GetOrientation
+		           WRITE SetOrientation
+		           NOTIFY OrientationChanged)
+		Orientation GetOrientation() const;
+		void SetOrientation(Orientation orientation);
+		Orientation FlipOrientation();
+
+		Q_PROPERTY(QImage m_backImage
+		           READ GetBackImage)
+		QImage GetBackImage() const;
+		void SetBackImage();
 
 		// Rotation varies from 0 to 359 (degrees)
 		const unsigned int MIN_ROTATION = 0;
 		const unsigned int MAX_ROTATION = 359;
 		Q_PROPERTY(unsigned int rotation
-		           READ getRotation
-		           WRITE setRotation
-		           NOTIFY rotationChanged)
-		unsigned int getRotation() const;
-		void setRotation(unsigned int rotation);
+		           READ GetRotation
+		           WRITE SetRotation
+		           NOTIFY RotationChanged)
+		unsigned int GetRotation() const;
+		void SetRotation(unsigned int rotation);
 
 		// Get the card's face image
-		QImage getCardImage();
+		QImage GetFaceImage();
 
 		/** Construcors/destrucors
 		 * If no suit or PIP is specified, a 2 of spades will be created.
 		 */
 		explicit Card(Pip pip = PIP_2, Suit suit = SUIT_SPADE,
-		              Orientation orientation = FACE_DOWN, unsigned int rotation = 0,
-		              QObject *parent = nullptr);
+		              Orientation orientation = FACE_DOWN, unsigned int rotation = 0);
 		virtual ~Card();
 
 		// Convencience operators
@@ -81,17 +86,16 @@ class Card : public QObject
 		string Print();
 
 	signals:
-		void orientationChanged(Card::Orientation orientation);
-		void rotationChanged(unsigned int);
+		void OrientationChanged(Card::Orientation orientation);
+		void RotationChanged(unsigned int);
 
 	public slots:
 
 	private:
 		Pip m_pip;
 		Suit m_suit;
-		QImage m_cardImage;
 
-		string getCardImagePath(Pip pip, Suit suit);
+		string GetCardImagePath(Pip pip, Suit suit);
 
 		/* Beyond the specifics of each card, there are useful fields that can be used different games, such
 		 * as whether the card is face up/down, or rotated.
@@ -99,9 +103,13 @@ class Card : public QObject
 		Orientation m_orientation;		// Is the card face-up or down.
 		unsigned int m_rotation;
 
+		// Scale images to 1/4 their size. TODO: Make this adjustable based on table size.
+		const float m_imageSizeDivisor = 4.0;
+
+		QImage m_faceImage;
 		// Map all pips and suits to a resource path
 		const string basePath = ":/resources/cardImages/cards-compact/faces/";
-		const string resourcePath[PIP_NUMBER_OF_PIPS][SUIT_NUMBER_OF_SUITS] = {
+		const string cardImageName[PIP_NUMBER_OF_PIPS][SUIT_NUMBER_OF_SUITS] = {
 		  //Spades                      Clubs                      Diamonds                      Hearts
 		  //-------------------         -----------------          -------------------           -------------------
 		  {	"2_of_spades.svg",          "2_of_clubs.svg",          "2_of_diamonds.svg",          "2_of_hearts.svg" },
@@ -119,6 +127,10 @@ class Card : public QObject
 		  {	"ace_of_spades_fancy.svg",  "ace_of_clubs.svg",        "ace_of_diamonds.svg",        "ace_of_hearts.svg" },
 		  {	"joker_black.svg",          "joker_black.svg",         "joker_red.svg",              "joker_red.svg" }
 		};
+
+		// Set the deck's back image
+		static QImage m_backImage;
+		const QString m_cardBackImagePath = ":/resources/cardImages/cards-compact/backs/blue_solid.svg";
 };
 
 Q_DECLARE_METATYPE(Card::Orientation)

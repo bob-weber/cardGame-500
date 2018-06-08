@@ -29,14 +29,16 @@ SOURCES += \
     gamelogic_500.cpp \
     card.cpp \
     deck.cpp \
-    player.cpp
+    player.cpp \
+    clickableqlabel.cpp
 
 HEADERS += \
     mainwindow.h \
     gamelogic_500.h \
     card.h \
     deck.h \
-    player.h
+    player.h \
+    clickableqlabel.h
 
 FORMS += \
     mainwindow.ui

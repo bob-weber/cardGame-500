@@ -2,6 +2,8 @@
 #define DECK_H
 
 #include <QObject>
+#include <QImage>
+
 #include "card.h"
 
 class Deck : public QObject
@@ -20,8 +22,8 @@ class Deck : public QObject
 
 		// Retrieve how many cards are in the deck
 		Q_PROPERTY(unsigned int totalCardCount
-		           READ getTotalCardCount)
-		unsigned int getTotalCardCount() const;
+		           READ GetTotalCardCount)
+		unsigned int GetTotalCardCount() const;
 
 		/******************************************************************************************************************
 		 * Constructor that creates the specified deck.
@@ -76,9 +78,6 @@ class Deck : public QObject
 		 ******************************************************************************************************************/
 		void Print();
 
-		unsigned int getTotalCards(void);
-
-		Card *getCard(unsigned int cardIndex);
 
 		/******************************************************************************************************************
 		 * Returns the next card to be "dealt" from the deck
@@ -97,6 +96,8 @@ class Deck : public QObject
 	signals:
 
 	public slots:
+
+	protected:
 
 	private:
 		const unsigned int numOfCardsPerDeck[DECK_TOTAL_TYPES] =

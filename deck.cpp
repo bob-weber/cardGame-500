@@ -1,7 +1,7 @@
 #include "deck.h"
 #include "card.h"
 
-unsigned int Deck::getTotalCardCount() const
+unsigned int Deck::GetTotalCardCount() const
 {
 	return m_totalCardCount;
 }
@@ -107,7 +107,12 @@ Deck::Deck(DeckType deckType, unsigned int numOfJokers, unsigned int numOfDecks,
 		{	// We haven't created all the expected cards
 			throw out_of_range("Created too few cards");
 		}
-	}	// No cards needed for this deck.
+
+		// Set the deck's backside image
+		// This is a static class variable, so using any card will work.
+		m_deck[0]->SetBackImage();
+	}
+	// else, no cards needed for this deck.
 
 	// Initialize draw index to the top of the deck
 	m_drawIndex = 0;
@@ -145,13 +150,6 @@ void Deck::Shuffle()
 	 m_drawIndex = 0;
 
 }
-
-Card *Deck::getCard(unsigned int cardIndex)
-{
-	Card *card = m_deck[cardIndex];
-	return card;
-}
-
 
 Card *Deck::GetNextCard()
 {

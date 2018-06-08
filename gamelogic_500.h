@@ -22,6 +22,7 @@ class gameLogic_500 : public QObject
 	public slots:
 		void PlayGame();
 		void Deal();
+		void CardClicked(uint player, uint card);
 
 	private:
 		/******************************************************************************************************************
@@ -53,13 +54,31 @@ class gameLogic_500 : public QObject
 
 		void ReturnAllCards();
 
-		const uint m_numOfPlayers = 4;
+		// Define parameters for each player, and the kitty/discard piles
+		typedef struct {
+			QString name;
+			uint GUI_ID;
+			uint maxNumOfCards;
+			uint currentNumOfCards;
+		} playerT;
+
+		const uint m_numOfHands = 5;	// 4 players + the kitty
+		const uint m_KittyID = 4;
 		const uint m_numOfCardsPerPlayer = 10;
 		const uint m_numOfCardsInKitty = 5;
+		playerT m_PlayerInfo[5] =
+		{
+		  // ID 0-3 are the regular players
+		  // ID 4 is the kitty
+		  { "Kathy",     0, m_numOfCardsPerPlayer, 0 },
+		  { "Theodore",  1, m_numOfCardsPerPlayer, 0 },
+		  { "Priya",     2, m_numOfCardsPerPlayer, 0 },
+		  { "Edward",    3, m_numOfCardsPerPlayer, 0 },
+		  { "",          4, m_numOfCardsInKitty,   0 }
+		};
 
 		Deck *deck;					// The deck we're playing with
 		Player **m_player;	// Array of players
-		Player *m_kitty;		// Pointer to the kitty
 };
 
 #endif // GAMELOGIC_500_H

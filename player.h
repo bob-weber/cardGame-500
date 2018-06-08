@@ -9,20 +9,26 @@ class Player : public QObject
 {
 		Q_OBJECT
 	public:
-		explicit Player(uint playerIndex = 0, uint maxCards = 0, QObject *parent = nullptr);
+		explicit Player(QObject *parent = nullptr);
 		~Player();
 
-		Q_PROPERTY(uint m_playerIndex
-		           READ getPlayerIndex)
-		uint getPlayerIndex() const;
+		Q_PROPERTY(uint m_ID
+		           READ GetID
+		           WRITE SetID)
+		uint GetID() const;
+		void SetID(uint ID);
 
-		Q_PROPERTY(uint m_maxNumOfCardsInHand
-		           READ getPlayerMaxCards)
-		uint getPlayerMaxCards() const;
+		Q_PROPERTY(uint m_maxNumOfCards
+		           READ GetMaxNumOfCards
+		           WRITE SetMaxNumOfCards)
+		uint GetMaxNumOfCards() const;
+		void SetMaxNumOfCards(uint numOfCards);
 
-		Q_PROPERTY(uint m_numOfCardsInHand
-		           READ getPlayerNumOfCards)
-		uint getPlayerNumOfCards() const;
+		Q_PROPERTY(uint m_currentNumOfCards
+		           READ GetCurrentNumOfCards
+		           WRITE SetCurrentNumOfCards)
+		uint GetCurrentNumOfCards() const;
+		void SetCurrentNumOfCards(uint numOfCards);
 
 		/******************************************************************************************************************
 		 * Adds a card to this player's hand.
@@ -64,7 +70,7 @@ class Player : public QObject
 		 * Exceptions:
 		 *	-	Logic error if m_numOfCardsInHand indicates the hand is empty, but we found a card at the specified card slot.
 		 *	-	Runtime error if we're trying to remove a card from an empty card slot.
-		 *
+		 *GetCard
 		 * Notes:
 		 ******************************************************************************************************************/
 		void RemoveCardFromHand(unsigned int cardIndex);
@@ -84,14 +90,17 @@ class Player : public QObject
 		 ******************************************************************************************************************/
 		void RemoveAllCardsFromHand();
 
+		Card *GetCard(uint cardIndex);
+
 	signals:
 
 	public slots:
 
 	private:
-		uint m_playerIndex;			// Index we'll pass to the GUI to add cards to the hand
-		uint m_numOfCardsInHand;
-		uint m_maxNumOfCardsInHand;
+
+		uint m_ID;			// Index we'll pass to the GUI to add cards to the hand
+		uint m_currentNumOfCards;
+		uint m_maxNumOfCards;
 		Card **m_hand;					// Array of card ptrs for the cards in the hand
 
 		/******************************************************************************************************************

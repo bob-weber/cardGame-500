@@ -13,51 +13,43 @@ gameLogic_500::gameLogic_500(QObject *parent) : QObject(parent)
 gameLogic_500::~gameLogic_500()
 {
 	// Delete players
-	for (uint i = 0; i < m_numOfPlayers; i++)
+	for (uint i = 0; i < m_numOfHands; i++)
 	{
 		delete m_player[i];
 	}
 	delete[] m_player;
-
-	// Delete the kitty
-	delete m_kitty;
-
 }
 
 void gameLogic_500::PlayGame()
 {
-	bool gameOver = false;
+	// bool gameOver = false;
 
 	// Create a deck
 	deck = new Deck(Deck::DECK_4S_AND_UP, 1, 1);
 	deck->Print();
 
 	// Instantiate the players
-	m_player = new Player *[m_numOfPlayers];
-	for (uint i = 0; i < m_numOfPlayers; i++)
+	m_player = new Player *[m_numOfHands];
+	for (uint playerIndex = 0; playerIndex < m_numOfHands; playerIndex++)
 	{
-		m_player[i] = new Player(i, m_numOfCardsPerPlayer);
+		m_player[playerIndex] = new Player();
+
+		// Set each player's ID
+		m_player[playerIndex]->SetID(m_PlayerInfo[playerIndex].GUI_ID);
+
+		// All players start of with no cards
+		m_player[playerIndex]->SetCurrentNumOfCards(0);
+
+		// Max # of cards depends on whether this is a normal player or the kitty
+		m_player[playerIndex]->SetMaxNumOfCards(m_PlayerInfo[playerIndex].maxNumOfCards);
+
+		if (playerIndex < m_KittyID)
+		{	// Not the kitty
+			// Update the player's GUI name
+			emit PlayerNameChanged(m_PlayerInfo[playerIndex].GUI_ID, m_PlayerInfo[playerIndex].name);
+			emit PlayerActionChanged(m_PlayerInfo[playerIndex].GUI_ID, "Wait");
+		}
 	}
-
-	// Create the kitty
-	// The kitty player index is 4. This is defined by the GUI.
-	m_kitty = new Player(4, m_numOfCardsInKitty);
-
-	// set the player's names
-	emit PlayerNameChanged(0, "Kathy");
-	emit PlayerNameChanged(1, "Theodore");
-	emit PlayerNameChanged(2, "Priya");
-	emit PlayerNameChanged(3, "Edward");
-	emit PlayerActionChanged(0, "Wait");
-	emit PlayerActionChanged(1, "Wait");
-	emit PlayerActionChanged(2, "Wait");
-	emit PlayerActionChanged(3, "Wait");
-#if 0
-	while (!gameOver)
-	{
-		//gameOver = true;
-	}	// while
-#endif
 
 	//emit finished();
 }
@@ -65,12 +57,10 @@ void gameLogic_500::PlayGame()
 void gameLogic_500::ReturnAllCards()
 {
 	// Return all cards from the players and the kitty
-	for (uint playerIndex = 0; playerIndex < m_numOfPlayers; playerIndex++)
+	for (uint playerIndex = 0; playerIndex < m_numOfHands; playerIndex++)
 	{
 		m_player[playerIndex]->RemoveAllCardsFromHand();
 	}
-	m_kitty->RemoveAllCardsFromHand();	// Empty the kitty
-
 }
 
 void gameLogic_500::Deal()
@@ -82,22 +72,15 @@ void gameLogic_500::Deal()
 	// 10 go to each player, and 5 to the kitty.
 	uint playerIndex = 0;
 	bool dealToKittyThisPass = false;
-	for (uint cardIndex = 0; cardIndex < deck->getTotalCardCount(); cardIndex++)
+	for (uint cardIndex = 0; cardIndex < deck->GetTotalCardCount(); cardIndex++)
 	{
-		if (playerIndex < m_numOfPlayers)
-		{	// Deal to a player's hand
-			AddCardToPlayer(m_player[playerIndex]);
-		}
-		else
-		{	// We're dealing to the kitty
-			AddCardToPlayer(m_kitty);
-		}
+		AddCardToPlayer(m_player[playerIndex]);
 		++playerIndex;
 
 		// Reset the player index when appropriate
 		if (dealToKittyThisPass)
 		{	// Don't reset player index until we deal to the kitty
-			if (playerIndex >= (m_numOfPlayers + 1))
+			if (playerIndex >= m_numOfHands)
 			{
 				playerIndex = 0;
 				dealToKittyThisPass = false;
@@ -105,8 +88,8 @@ void gameLogic_500::Deal()
 			// Deal to next player or kitty
 		}
 		else
-		{	// Don't deal a card to the kitty
-			if (playerIndex >= m_numOfPlayers)
+		{	// Don't deal a card to the kitty, so reset 1 less than # of hands
+			if (playerIndex >= (m_numOfHands - 1))
 			{
 				playerIndex = 0;
 				dealToKittyThisPass = true;
@@ -114,6 +97,33 @@ void gameLogic_500::Deal()
 			// Deal to next player
 		}
 	}
+}
+
+void gameLogic_500::CardClicked(uint player, uint card)
+{
+	Card *playerCard = nullptr;
+	// Find the player that matches our player index
+	for (uint playerIndex = 0; playerIndex < m_numOfHands; playerIndex++)
+	{
+		if (m_player[playerIndex]->GetID() == player)
+		{	// This is the player who's card was clicked
+			playerCard = m_player[playerIndex]->GetCard(card);
+			break;
+		}
+		// else, not the correct player
+	}	// for
+
+	if (playerCard != nullptr)
+	{	// We have a valid card
+		Card::Orientation orientation = playerCard->FlipOrientation();
+		if (orientation == Card::FACE_DOWN) {
+			PlayerCardChanged(player, card, playerCard->GetBackImage());
+		}
+		else {
+			PlayerCardChanged(player, card, playerCard->GetFaceImage());
+		}
+	}
+	// else, this card hasn't been dealt yet or we didn't find it
 }
 
 void gameLogic_500::AddCardToPlayer(Player *player)
@@ -124,16 +134,17 @@ void gameLogic_500::AddCardToPlayer(Player *player)
 	Card *card = deck->GetNextCard();
 	uint handIndex = player->AddCardToHand(card);
 
-	if (handIndex < player->getPlayerMaxCards())
+	if (handIndex < player->GetMaxNumOfCards())
 	{	// We successfully added the card to this player's hand
+		QImage image;
+		if (card->GetOrientation() == Card::FACE_DOWN) {
+			image = card->GetBackImage();
+		}
+		else {
+			image = card->GetFaceImage();
+		}
 		// Update the GUI with this card.
-		// Scale images to 1/4 their size. TODO: Make this adjustable based on table size.
-		const float imageScalingDivisor = 4.0;
-		QImage image = card->getCardImage();
-		QSize imageSize = image.size() / imageScalingDivisor;
-		// QSize imageScaled = imageSize / imageScalingDivisor;
-		QImage imageScaled = image.scaled(imageSize);
-		emit PlayerCardChanged(player->getPlayerIndex(), handIndex, imageScaled);
+		emit PlayerCardChanged(player->GetID(), handIndex, image);
 	}
 	else
 	{
