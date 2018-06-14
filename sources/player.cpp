@@ -50,6 +50,16 @@ void Player::SetCurrentNumOfCards(uint numOfCards)
 	this->m_currentNumOfCards = numOfCards;
 }
 
+uint Player::GetCardRotation() const
+{
+	return this->m_cardRotation;
+}
+
+void Player::SetCardRotation(uint rotation)
+{
+	this->m_cardRotation = rotation;
+}
+
 uint Player::AddCardToHand(Card *card)
 {
 	uint cardIndex = m_maxNumOfCards;	// This is an invalid index value. We'll set it to a valid one if successful.

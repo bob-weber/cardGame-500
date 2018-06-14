@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	 */
 	connect(gameLogic, SIGNAL(PlayerNameChanged(uint,QString)), this, SLOT(setPlayerName(uint,QString)));
 	connect(gameLogic, SIGNAL(PlayerActionChanged(uint,QString)), this, SLOT(setPlayerAction(uint,QString)));
-	connect(gameLogic, SIGNAL(PlayerCardChanged(uint, uint, QImage)), this, SLOT(setPlayerCardImage(uint,uint,QImage)));
+	connect(gameLogic, SIGNAL(PlayerCardChanged(uint, uint, QImage,uint)), this, SLOT(setPlayerCardImage(uint,uint,QImage,uint)));
 	connect(ui->pb_Deal, SIGNAL(clicked()), gameLogic, SLOT(Deal()));
 
 	// Connect label clicks to our handler
@@ -137,14 +137,14 @@ void MainWindow::setPlayerAction(const unsigned int player, const QString &actio
 	{
 		/*const*/ QLabel *label = lblActionPtrs[player];
 		if (label != nullptr)
-		{
+		{emit
 			label->setText(action);
 		}
 	}
 	// else, ignore this request
 }
 
-void MainWindow::setPlayerCardImage(uint player, uint cardIndex, QImage image)
+void MainWindow::setPlayerCardImage(uint player, uint cardIndex, QImage image, uint rotation)
 {
 	QLabel *label = nullptr;
 
@@ -159,8 +159,16 @@ void MainWindow::setPlayerCardImage(uint player, uint cardIndex, QImage image)
 
 	if ((player < m_NumOfPlayers) && (cardIndex < m_NumOfCards))
 	{
+		// Get the right label
 		label = lblCardPtrs[player][cardIndex];
-		label->setPixmap(QPixmap::fromImage(image));
+
+		// Rotate the image
+		QMatrix matrix;
+		matrix.rotate(rotation);
+		QImage rotatedImage = image.transformed(matrix);
+
+		// Update the image on the screen
+		label->setPixmap(QPixmap::fromImage(rotatedImage));
 	}
 	// else, ignore this request
 }

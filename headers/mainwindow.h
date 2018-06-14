@@ -22,7 +22,7 @@ class MainWindow : public QMainWindow
 	public slots:
 		void setPlayerName(const unsigned int player, const QString name);
 		void setPlayerAction(const unsigned int player, const QString &action);
-		void setPlayerCardImage(uint player, uint cardIndex, QImage image);
+		void setPlayerCardImage(uint player, uint cardIndex, QImage image, uint rotation);
 
 	private:
 		Ui::MainWindow *ui;

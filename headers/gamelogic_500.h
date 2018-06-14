@@ -17,7 +17,7 @@ class gameLogic_500 : public QObject
 		void finished();
 		void PlayerNameChanged(uint player, QString name);
 		void PlayerActionChanged(uint player, QString name);
-		void PlayerCardChanged(uint player, uint card, QImage image);
+		void PlayerCardChanged(uint player, uint card, QImage image, uint rotation);
 
 	public slots:
 		void PlayGame();
@@ -60,6 +60,7 @@ class gameLogic_500 : public QObject
 			uint GUI_ID;
 			uint maxNumOfCards;
 			uint currentNumOfCards;
+			uint cardRotation;
 		} playerT;
 
 		const uint m_numOfHands = 5;	// 4 players + the kitty
@@ -70,11 +71,11 @@ class gameLogic_500 : public QObject
 		{
 		  // ID 0-3 are the regular players
 		  // ID 4 is the kitty
-		  { "Kathy",     0, m_numOfCardsPerPlayer, 0 },
-		  { "Theodore",  1, m_numOfCardsPerPlayer, 0 },
-		  { "Priya",     2, m_numOfCardsPerPlayer, 0 },
-		  { "Edward",    3, m_numOfCardsPerPlayer, 0 },
-		  { "",          4, m_numOfCardsInKitty,   0 }
+		  { "Kathy",     0, m_numOfCardsPerPlayer, 0,  0 },
+		  { "Theodore",  1, m_numOfCardsPerPlayer, 0, 90 },
+		  { "Priya",     2, m_numOfCardsPerPlayer, 0,  0 },
+		  { "Edward",    3, m_numOfCardsPerPlayer, 0, 90 },
+		  { "",          4, m_numOfCardsInKitty,   0,  0 }
 		};
 
 		Deck *deck;					// The deck we're playing with

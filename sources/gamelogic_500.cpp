@@ -49,6 +49,9 @@ void gameLogic_500::PlayGame()
 			emit PlayerNameChanged(m_PlayerInfo[playerIndex].GUI_ID, m_PlayerInfo[playerIndex].name);
 			emit PlayerActionChanged(m_PlayerInfo[playerIndex].GUI_ID, "Wait");
 		}
+
+		// Set the card's rotation on the GUI
+		m_player[playerIndex]->SetCardRotation(m_PlayerInfo[playerIndex].cardRotation);
 	}
 
 	//emit finished();
@@ -102,12 +105,14 @@ void gameLogic_500::Deal()
 void gameLogic_500::CardClicked(uint player, uint card)
 {
 	Card *playerCard = nullptr;
+	uint cardRotation = 0;
 	// Find the player that matches our player index
 	for (uint playerIndex = 0; playerIndex < m_numOfHands; playerIndex++)
 	{
 		if (m_player[playerIndex]->GetID() == player)
 		{	// This is the player who's card was clicked
 			playerCard = m_player[playerIndex]->GetCard(card);
+			cardRotation = m_player[playerIndex]->GetCardRotation();
 			break;
 		}
 		// else, not the correct player
@@ -117,10 +122,10 @@ void gameLogic_500::CardClicked(uint player, uint card)
 	{	// We have a valid card
 		Card::Orientation orientation = playerCard->FlipOrientation();
 		if (orientation == Card::FACE_DOWN) {
-			PlayerCardChanged(player, card, playerCard->GetBackImage());
+			emit PlayerCardChanged(player, card, playerCard->GetBackImage(), cardRotation);
 		}
 		else {
-			PlayerCardChanged(player, card, playerCard->GetFaceImage());
+			emit PlayerCardChanged(player, card, playerCard->GetFaceImage(), cardRotation);
 		}
 	}
 	// else, this card hasn't been dealt yet or we didn't find it
@@ -143,8 +148,10 @@ void gameLogic_500::AddCardToPlayer(Player *player)
 		else {
 			image = card->GetFaceImage();
 		}
+
 		// Update the GUI with this card.
-		emit PlayerCardChanged(player->GetID(), handIndex, image);
+		uint cardRotation = player->GetCardRotation();
+		emit PlayerCardChanged(player->GetID(), handIndex, image, cardRotation);
 	}
 	else
 	{

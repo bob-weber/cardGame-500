@@ -8,6 +8,8 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+CONFIG += c++14 static
+
 TARGET = cards-500
 TEMPLATE = app
 
@@ -24,21 +26,21 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-    main.cpp \
-    mainwindow.cpp \
-    gamelogic_500.cpp \
-    card.cpp \
-    deck.cpp \
-    player.cpp \
-    clickableqlabel.cpp
+    sources/card.cpp \
+    sources/clickableqlabel.cpp \
+    sources/deck.cpp \
+    sources/gamelogic_500.cpp \
+    sources/main.cpp \
+    sources/mainwindow.cpp \
+    sources/player.cpp
 
 HEADERS += \
-    mainwindow.h \
-    gamelogic_500.h \
-    card.h \
-    deck.h \
-    player.h \
-    clickableqlabel.h
+    headers/card.h \
+    headers/clickableqlabel.h \
+    headers/deck.h \
+    headers/gamelogic_500.h \
+    headers/mainwindow.h \
+    headers/player.h
 
 FORMS += \
     mainwindow.ui

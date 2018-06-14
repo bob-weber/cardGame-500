@@ -16,19 +16,25 @@ class Player : public QObject
 		           READ GetID
 		           WRITE SetID)
 		uint GetID() const;
-		void SetID(uint ID);
+		void SetID(uint);
 
 		Q_PROPERTY(uint m_maxNumOfCards
 		           READ GetMaxNumOfCards
 		           WRITE SetMaxNumOfCards)
 		uint GetMaxNumOfCards() const;
-		void SetMaxNumOfCards(uint numOfCards);
+		void SetMaxNumOfCards(uint);
 
 		Q_PROPERTY(uint m_currentNumOfCards
 		           READ GetCurrentNumOfCards
 		           WRITE SetCurrentNumOfCards)
 		uint GetCurrentNumOfCards() const;
-		void SetCurrentNumOfCards(uint numOfCards);
+		void SetCurrentNumOfCards(uint);
+
+		Q_PROPERTY(uint m_cardRotation
+		           READ GetCardRotation
+		           WRITE SetCardRotation)
+		uint GetCardRotation() const;
+		void SetCardRotation(uint);
 
 		/******************************************************************************************************************
 		 * Adds a card to this player's hand.
@@ -101,6 +107,7 @@ class Player : public QObject
 		uint m_ID;			// Index we'll pass to the GUI to add cards to the hand
 		uint m_currentNumOfCards;
 		uint m_maxNumOfCards;
+		uint m_cardRotation;
 		Card **m_hand;					// Array of card ptrs for the cards in the hand
 
 		/******************************************************************************************************************
