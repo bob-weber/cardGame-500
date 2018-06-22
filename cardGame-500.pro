@@ -9,6 +9,7 @@ QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++14 static
+INCLUDEPATH += headers
 
 TARGET = cards-500
 TEMPLATE = app
@@ -32,7 +33,8 @@ SOURCES += \
     sources/gamelogic_500.cpp \
     sources/main.cpp \
     sources/mainwindow.cpp \
-    sources/player.cpp
+    sources/player.cpp \
+    sources/user_bid_dialog.cpp
 
 HEADERS += \
     headers/card.h \
@@ -40,10 +42,12 @@ HEADERS += \
     headers/deck.h \
     headers/gamelogic_500.h \
     headers/mainwindow.h \
-    headers/player.h
+    headers/player.h \
+    headers/user_bid_dialog.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    user_bid_dialog.ui
 
 RESOURCES += \
-    cardimages.qrc
+    cardgame.qrc

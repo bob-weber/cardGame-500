@@ -13,16 +13,16 @@ namespace Ui {
 class MainWindow : public QMainWindow
 {
 		Q_OBJECT
-		QThread gameLogicThread;
+		//QThread gameLogicThread;
 
 	public:
 		explicit MainWindow(QWidget *parent = 0);
 		~MainWindow();
 
 	public slots:
-		void setPlayerName(const unsigned int player, const QString name);
-		void setPlayerAction(const unsigned int player, const QString &action);
-		void setPlayerCardImage(uint player, uint cardIndex, QImage image, uint rotation);
+		void SetPlayerName(const unsigned int player, const QString name);
+		void SetPlayerAction(const unsigned int player, const QString &action);
+		void SetPlayerCardImage(uint player, uint cardIndex, QImage image, uint rotation);
 
 	private:
 		Ui::MainWindow *ui;

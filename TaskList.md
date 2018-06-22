@@ -1,10 +1,12 @@
 # Phase 0
 * Goall: Working game, with manual play. User must control each player's hand.
-- [ ] Add Menu new game
-- [ ] Add menu quit
+- [x] Add card rotation
+- [x] Add Menu new game
+- [x] Add menu quit
 - [ ] Add menu about, game information
 - [ ] Add teams
 - [ ] Add bidding capability
+  * In progress. Need to verify bids are valid, and display them on the table.
 - [ ] Test card play for validity/prevent illegal moves
 - [ ] Add scoring
 - [ ] Pop-up after each hand, indicating:
@@ -24,7 +26,7 @@
 - [ ] Add computerized game play
 * TODO: Much improvement expected to be needed.
 
-Phase 2
+# Phase 2
 * Rewrite graphics to support card motion, overlay, etc.
-* PUrposely left vague at this time. Define better when it's time.
+* Purposely left vague at this time. Define better when it's time.
 * Likely use graphics view.

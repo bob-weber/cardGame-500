@@ -70,6 +70,7 @@ uint Player::AddCardToHand(Card *card)
 		if (cardIndex < m_maxNumOfCards)
 		{	// We found an entry to deal the card
 			m_hand[cardIndex] = card;
+			++m_currentNumOfCards;
 		}
 		else
 		{	// Logic error. Our card pointers and num of cards in the hand are out of sync.
@@ -87,13 +88,12 @@ uint Player::AddCardToHand(Card *card)
 
 void Player::RemoveCardFromHand(unsigned int cardIndex)
 {
-	Card *card = nullptr;
 	if (m_hand[cardIndex] != nullptr)
 	{	// This card slot is not empty
-		card = m_hand[cardIndex];
-		m_hand[cardIndex] = nullptr;
+		m_hand[cardIndex]->SetOrientation(Card::FACE_DOWN);	// Flip all cards face down
+		m_hand[cardIndex] = nullptr;		// Empty this place in the hand
 		if (m_currentNumOfCards > 0)
-		{
+		{	// Update # of cards in hand
 			--m_currentNumOfCards;
 		}
 		else
@@ -101,19 +101,20 @@ void Player::RemoveCardFromHand(unsigned int cardIndex)
 			throw logic_error("RemoveCardFromHand: m_numOfCardsInHand is 0, but we found a card in the hand.");
 		}
 	}
-	else
-	{
-		throw runtime_error("RemoveCardFromHand: Trying to remove a card from an empty card slot.");
-	}
+	// else, this slot is already empty
+	// This is normal. We don't make sure the slot has a card before trying to remove it.
 }
 
 void Player::RemoveAllCardsFromHand()
 {
 	for (unsigned int cardIndex = 0; cardIndex < m_maxNumOfCards; ++cardIndex)
 	{
-		m_hand[cardIndex] = nullptr;
+		RemoveCardFromHand(cardIndex);
 	}
-	m_currentNumOfCards = 0;
+	if (m_currentNumOfCards != 0)
+	{	// This is an error. Counter should be maintained as we add or remove cards
+		throw logic_error("RemoveAllCardsFromHand: m_numOfCardsInHand is not 0.");
+	}
 }
 
 
