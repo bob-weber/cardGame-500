@@ -100,6 +100,9 @@ class logic : public QWidget
 		uint m_dealer;			// dealer for this round
 
 		Bid *m_currentBid;
+
+		uint m_nellowTeamId;	// Id of team that bids nellow
+
 };
 
 #endif // LOGIC_H

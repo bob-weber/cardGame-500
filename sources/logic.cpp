@@ -155,11 +155,13 @@ bool logic::GetBids()
 
 	// Get a bid for each player
 	bool someoneBid = false;
+	m_nellowTeamId = NUM_OF_PLAYERS;
 	for (uint i=0; i < NUM_OF_PLAYERS; i++)
 	{
 		// start bidding to the left of the dealer
 		bidder = advanceIndex(bidder, NUM_OF_PLAYERS);
 		emit PlayerActionChanged(bidder, "Bidding");
+		uint bidScore;
 
 		bool validBidOrPass = false;
 		while (!validBidOrPass)
@@ -170,15 +172,47 @@ bool logic::GetBids()
 			auto test = dialog.exec();
 			if (test == QDialog::Accepted)
 			{	// The player completed their bid or passed
-				uint bidScore = playerBid->GetScore();
+				bidScore = playerBid->GetScore();
 				if (bidScore > 0)
 				{	// The player bid something
 					if (bidScore > m_currentBid->GetScore())
 					{	// This bid is > than our current bid
-						validBidOrPass = true;
-						someoneBid = true;
+						if (playerBid->GetBidSuit() == Bid::BID_NELLOW)
+						{	// Save nellow bid info in case someone later bids double nellow
+							/* We don't need to verify nellow hasn't already been bid in this round
+							 * because if it had, bidScore wouldn't be > the current score.
+							 */
+							validBidOrPass = true;
+							m_nellowTeamId = m_PlayerInfo[bidder].teamID;
+						}
+						else if (playerBid->GetBidSuit() == Bid::BID_DOUBLE_NELLOW)
+						{
+							// Double nellow is only valid if partner bid nellow
+							if (m_PlayerInfo[bidder].teamID == m_nellowTeamId)
+							{	// This is a valid double nellow bid
+								validBidOrPass = true;
+							}
+							// else, invalid double nellow bid
+						}
+						else
+						{	// Valid suit/# of tricks bid
+							validBidOrPass = true;
+						}
+					}
+					else
+					{	// Bid doesn't exceed current bid
+					}
+				}
+				else
+				{	// No bid
+					validBidOrPass = true;
+				}
 
-						// TODO: Double nellow is only valid if partner bids nellow
+				if (validBidOrPass)
+				{	// Bid is valid
+					if (bidScore > 0)
+					{	// This is an actual bid
+						someoneBid = true;
 
 						// See if current bid is a valid player's bid. If it is, we're replacing an existing bid.
 						if (m_currentBid->GetPlayerId() < NUM_OF_PLAYERS)
@@ -195,7 +229,32 @@ bool logic::GetBids()
 						emit PlayerActionChanged(m_currentBid->GetPlayerId(), bidMsg);
 					}
 					else
-					{	// New bid isn't > current bid
+					{	// This player passed
+						emit PlayerActionChanged(bidder, "Bid: Passed");
+					}
+				}
+				else
+				{	/* Not a valid bid
+					 * This is because one of the following are true:
+					 * 1. The bid amount score is < the current bid, or
+					 * 2. The bid is double nellow, but their partner hasn't bid nellow
+					 */
+					if (playerBid->GetBidSuit() == Bid::BID_DOUBLE_NELLOW)
+					{	// Invalid double nellow bid
+						QMessageBox msgBox;
+						QString msg = QString("%1, your bid of %2 is invalid.")
+						    .arg(*GetPlayerName(bidder)).arg(playerBid->GetBidText());
+						QString informativeMsg = QString("%1 requires your parter bid Nellow.\n\rSelect Ok to re-bid.")
+						    .arg(playerBid->GetBidText()).arg(m_currentBid->GetScore()).arg(playerBid->GetScore());
+						msgBox.setText(msg);
+						msgBox.setInformativeText(informativeMsg);
+						msgBox.setStandardButtons(QMessageBox::Ok);
+						msgBox.setDefaultButton(QMessageBox::Ok);
+						msgBox.exec();
+						// validBidOrPass == false will result in user rebidding
+					}
+					else
+					{	// Bid score is too low
 						QMessageBox msgBox;
 						QString msg = QString("%1, your bid of %2 is invalid.")
 						    .arg(*GetPlayerName(bidder)).arg(playerBid->GetBidText());
@@ -217,16 +276,8 @@ bool logic::GetBids()
 						{	// User has cancelled, meaning they want to rebid
 							// Leave validBidOrPass false.
 							// The while loop will redo the bidding dialog
-							validBidOrPass = false;
 						}
 					}
-				}
-				else
-				{	// The player passed
-					// Don't update current bid.
-					// We're done
-					validBidOrPass = true;
-					emit PlayerActionChanged(bidder, "Bid: Passed");
 				}
 			}
 			else
