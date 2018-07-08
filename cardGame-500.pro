@@ -30,20 +30,25 @@ SOURCES += \
     sources/card.cpp \
     sources/clickableqlabel.cpp \
     sources/deck.cpp \
-    sources/gamelogic_500.cpp \
     sources/main.cpp \
     sources/mainwindow.cpp \
     sources/player.cpp \
-    sources/user_bid_dialog.cpp
+    sources/user_bid_dialog.cpp \
+    sources/logic.cpp \
+    sources/utilities.cpp \
+    sources/bid.cpp
 
 HEADERS += \
     headers/card.h \
     headers/clickableqlabel.h \
     headers/deck.h \
-    headers/gamelogic_500.h \
     headers/mainwindow.h \
     headers/player.h \
-    headers/user_bid_dialog.h
+    headers/user_bid_dialog.h \
+    headers/logic.h \
+    headers/game_settings.h \
+    headers/utilities.h \
+    headers/bid.h
 
 FORMS += \
     mainwindow.ui \
