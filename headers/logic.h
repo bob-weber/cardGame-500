@@ -1,29 +1,30 @@
-#ifndef GAMELOGIC_500_H
-#define GAMELOGIC_500_H
+#ifndef LOGIC_H
+#define LOGIC_H
 
 #include <QWidget>
-#include "headers/player.h"
-#include "headers/deck.h"
+#include <QString>
 
-class gameLogic_500 : public QWidget
+#include "player.h"
+#include "deck.h"
+#include "game_settings.h"
+#include "bid.h"
+
+class logic : public QWidget
 {
 		Q_OBJECT
 
 	public:
-		explicit gameLogic_500(QWidget *parent = nullptr);
-		~gameLogic_500();
-
-		enum bid_suit { BID_SPADES, BID_CLUBS, BID_DIAMONDS, BID_HEARTS, BID_NO_TRUMP,
-			              BID_NELLOW, BID_OPEN_NELLOW, BID_DOUBLE_NELLOW, BID_NUM_OF_SUITS };
-
-		// This is the current bid. A valid bid replaces the existing bid, so we don't need to keep a record for each player.
-		typedef struct {
-			uint playerID;			// player with the current bid
-			uint numOfTricks;		// # of tricks bid
-			bid_suit suit;			// suit bid
-		} bidT;
+		explicit logic(QWidget *parent = nullptr);
+		~logic();
 
 		void SetupTable();
+
+		Q_PROPERTY(uint m_dealer
+		           READ GetDealer
+		           WRITE SetDealer)
+		uint GetDealer() const;
+		void SetDealer(uint);
+		QString *GetPlayerName(uint playerIndex);
 
 	signals:
 		void finished();
@@ -34,15 +35,34 @@ class gameLogic_500 : public QWidget
 	public slots:
 		void PlayGame();
 		void Deal();
-		void Bid();
 		void CardClicked(uint player, uint card);
 		void NewGame();
+		bool GetBids();
 
-		void SetBid(gameLogic_500::bid_suit suit, uint numOfTricks);
-		void SetBidPlayerID(uint ID);
-		bidT *GetBid();
+	protected:
+		typedef struct {
+			QString name;
+			uint GUI_ID;
+			uint maxNumOfCards;
+			uint currentNumOfCards;
+			uint cardRotation;
+			uint teamID;	// 0=no team. >0 with the same id groups players on a team.
+		} playerT;
+		playerT m_PlayerInfo[NUM_OF_HANDS] =
+		{
+		  // ID 0-3 are the regular players
+		  // ID 4 is the kitty
+		  // ID         GUI ID  Max # Cards               Current # Cards  Card Rotation  Team ID
+		  // ---------  ------  ------------------------  ---------------  -------------  -------
+		  { "Kathy",        0,  NUM_OF_CARDS_PER_PLAYER,               0,             0,       1 },
+		  { "Theodore",     1,  NUM_OF_CARDS_PER_PLAYER,               0,            90,       2 },
+		  { "Priya",        2,  NUM_OF_CARDS_PER_PLAYER,               0,           180,       1 },
+		  { "Edward",       3,  NUM_OF_CARDS_PER_PLAYER,               0,           270,       2 },
+		  { "",             4,    NUM_OF_CARDS_IN_KITTY,               0,             0,       0 }
+		};
 
 	private:
+
 		/******************************************************************************************************************
 		 * Deal cards to each of the players and the kitty.
 		 *
@@ -72,16 +92,14 @@ class gameLogic_500 : public QWidget
 		void AddCardToPlayer(Player *, Card *);
 		void ReturnAllCards();
 
-		uint advanceIndex(uint index, const uint max);
-
 		Deck *deck;					// The deck we're playing with
 		Player **m_player;	// Array of players
 
 		// Keep track of which player is currently active (bidding, playing, etc.)
-		uint m_activePlayer;
+		//uint m_activePlayer;
 		uint m_dealer;			// dealer for this round
 
-		bidT m_bidStatus;
+		Bid *m_currentBid;
 };
 
-#endif // GAMELOGIC_500_H
+#endif // LOGIC_H

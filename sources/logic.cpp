@@ -1,61 +1,26 @@
-#include "headers/deck.h"
-#include "headers/player.h"
-#include "headers/user_bid_dialog.h"
+#include <QMessageBox>
 
-#include "gamelogic_500.h"
+#include "deck.h"
+#include "player.h"
+#include "game_settings.h"
+#include "utilities.h"
+#include "bid.h"
+#include "user_bid_dialog.h"
+
+
+#include "logic.h"
 
 using namespace std;
 
-// Define constants here, so we can use them in structure definitions
-const uint m_numOfTeams = 2;
-const uint m_numOfPlayers = 4;
-const uint m_numOfHands = m_numOfPlayers + 1;
-const uint m_KittyIndex = 4;
-const uint m_numOfCardsPerPlayer = 10;
-const uint m_numOfCardsInKitty = 5;
 
-const uint BidValue[gameLogic_500::BID_NUM_OF_SUITS][m_numOfCardsPerPlayer] =
-{	//   1    2    3    4    5    6    7    8    9    10
-  // ----  ---  ---  ---  ---  ---  ---  ---  ---  ---
-  {     0,   0,   0,   0,   0,  40, 140, 240, 340, 440 },	// Spades bid
-  {     0,   0,   0,   0,   0,  60, 160, 260, 360, 460 },	// Clubs bid
-  {     0,   0,   0,   0,   0,  80, 180, 280, 380, 480 },	// Diamonds bid
-  {     0,   0,   0,   0,   0, 100, 200, 300, 400, 500 },	// Hearts bid
-  {     0,   0,   0,   0,   0, 120, 220, 320, 420, 520 },	// No Trump bid
-  {     0,   0,   0,   0,   0,   0,   0,   0,   0, 250 },	// Nellow bid
-  {     0,   0,   0,   0,   0,   0,   0,   0,   0, 500 },	// Open nellow bid
-  {     0,   0,   0,   0,   0,   0,   0,   0,   0, 500 },	// Double nellow bid
-};
-
-typedef struct {
-	QString name;
-	uint GUI_ID;
-	uint maxNumOfCards;
-	uint currentNumOfCards;
-	uint cardRotation;
-	uint teamID;	// 0=no team. >0 with the same id groups players on a team.
-} playerT;
-playerT m_PlayerInfo[m_numOfHands] =
-{
-  // ID 0-3 are the regular players
-  // ID 4 is the kitty
-  // ID        GUI ID  Max # Cards  Current # Cards  Card Rotation  Team ID  Bid Trump  Bid Num of Tricks
-  { "Kathy",     0,             m_numOfCardsPerPlayer, 0,   0, 1 },
-  { "Theodore",  1,             m_numOfCardsPerPlayer, 0,  90, 2 },
-  { "Priya",     2,             m_numOfCardsPerPlayer, 0, 180, 1 },
-  { "Edward",    3,             m_numOfCardsPerPlayer, 0, 270, 2 },
-  { "",          4,  m_numOfCardsInKitty,   0,   0, 0 }
-};
-
-
-gameLogic_500::gameLogic_500(QWidget *parent) : QWidget(parent)
+logic::logic(QWidget *parent) : QWidget(parent)
 {
 	/* Allocate player instances in the constructor
 	 * Since we delete them in the destructor, it's more logical to allocate them here, rather than rely on
 	 * another function being called after the constructor.
 	 */
-	m_player = new Player *[m_numOfHands];
-	for (uint playerIndex = 0; playerIndex < m_numOfHands; playerIndex++)
+	m_player = new Player *[NUM_OF_HANDS];
+	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
 	{
 		m_player[playerIndex] = new Player();
 
@@ -66,7 +31,7 @@ gameLogic_500::gameLogic_500(QWidget *parent) : QWidget(parent)
 	 */
 }
 
-void gameLogic_500::SetupTable()
+void logic::SetupTable()
 {
 	/********************************************************************************************************************
 	 * Setup the deck, players, etc.
@@ -76,7 +41,7 @@ void gameLogic_500::SetupTable()
 	deck->Print();
 
 	// Initialize the playersDealCards
-	for (uint playerIndex = 0; playerIndex < m_numOfHands; playerIndex++)
+	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
 	{
 		// Set each player's ID
 		m_player[playerIndex]->SetID(m_PlayerInfo[playerIndex].GUI_ID);
@@ -87,22 +52,32 @@ void gameLogic_500::SetupTable()
 		// Max # of cards depends on whether this is a normal player or the kitty
 		m_player[playerIndex]->SetMaxNumOfCards(m_PlayerInfo[playerIndex].maxNumOfCards);
 
-		if (playerIndex < m_KittyIndex)
+		if (playerIndex < KITTY_INDEX)
 		{	// Not the kitty
 			// Update the player's GUI name
 			emit PlayerNameChanged(m_PlayerInfo[playerIndex].GUI_ID, m_PlayerInfo[playerIndex].name);
-			emit PlayerActionChanged(m_PlayerInfo[playerIndex].GUI_ID, "Wait");
+			emit PlayerActionChanged(m_PlayerInfo[playerIndex].GUI_ID, "");
 		}
 
 		// Set the card's rotation on the GUI
 		m_player[playerIndex]->SetCardRotation(m_PlayerInfo[playerIndex].cardRotation);
 	}
+
+	/* Create the currently valid bid
+	 * We use this throughout the game.
+	 * The player ID is set to NUM_OF_PLAYERS, which isn't a valid ID.
+	 */
+	m_currentBid = new Bid();
+
+	// Start dealing with player 0
+	m_dealer = 0;
 }
 
-gameLogic_500::~gameLogic_500()
+
+logic::~logic()
 {
 	// Delete players
-	for (uint i = 0; i < m_numOfHands; i++)
+	for (uint i = 0; i < NUM_OF_HANDS; i++)
 	{
 		delete m_player[i];
 	}
@@ -110,61 +85,182 @@ gameLogic_500::~gameLogic_500()
 }
 
 
-void gameLogic_500::PlayGame()
+uint logic::GetDealer() const
+{
+	return this->m_dealer;
+}
+
+void logic::SetDealer(uint dealer)
+{
+	this->m_dealer = dealer;
+}
+
+QString *logic::GetPlayerName(uint playerIndex)
+{
+	return &m_PlayerInfo[playerIndex].name;
+}
+
+
+void logic::PlayGame()
 {
 	/********************************************************************************************************************
 	 * Start a new game
 	 * This returns when the game is complete.
 	 ********************************************************************************************************************/
-	NewGame();
+	Deal();
+	//NewGame();
 
 	// TODO: pop-up to display winner
 }
 
-void gameLogic_500::NewGame()
+void logic::NewGame()
 {
 	// The deal starts with player 0
-	m_dealer = 0;
-	Deal();
+	m_dealer = m_PlayerInfo[0].GUI_ID;
 
-	//Bid();
+	// Get bids from each player
+	m_currentBid->Clear();
+	bool successfulBid = false;
+	while (!successfulBid)
+	{
+		Deal();
+
+		successfulBid = GetBids();
+		if (!successfulBid)
+		{
+			QMessageBox msgBox;
+			msgBox.setText("No one bid. We'll redeal and try again.");
+			msgBox.setInformativeText("No valid bid");
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.setDefaultButton(QMessageBox::Ok);
+			msgBox.exec();
+		}
+	}	// while
+
 	//PlayHand();
 	//Score();
 }
 
-void gameLogic_500::SetBid(bid_suit suit, uint numOfTricks)
+bool logic::GetBids()
 {
-	this->m_bidStatus.suit = suit;
-	this->m_bidStatus.numOfTricks = numOfTricks;
+	// Bidding starts left of the dealer. Set to dealer. We'll advance it below.
+	uint bidder = m_dealer;
+
+	// Set all player actions to waiting to bid
+	QString bidMsg = QString("Waiting");
+	for (uint i=0; i < NUM_OF_PLAYERS; i++)
+	{
+		emit PlayerActionChanged(m_PlayerInfo[i].GUI_ID, bidMsg);
+	}
+
+	// Get a bid for each player
+	bool someoneBid = false;
+	for (uint i=0; i < NUM_OF_PLAYERS; i++)
+	{
+		// start bidding to the left of the dealer
+		bidder = advanceIndex(bidder, NUM_OF_PLAYERS);
+		emit PlayerActionChanged(bidder, "Bidding");
+
+		bool validBidOrPass = false;
+		while (!validBidOrPass)
+		{
+			// This is the start of a player's bidding, so zero out the player's bid
+			Bid *playerBid = new Bid(bidder, 0, Bid::BID_NUM_OF_SUITS);
+			UserBidDialog dialog(GetPlayerName(bidder), playerBid);
+			auto test = dialog.exec();
+			if (test == QDialog::Accepted)
+			{	// The player completed their bid or passed
+				uint bidScore = playerBid->GetScore();
+				if (bidScore > 0)
+				{	// The player bid something
+					if (bidScore > m_currentBid->GetScore())
+					{	// This bid is > than our current bid
+						validBidOrPass = true;
+						someoneBid = true;
+
+						// TODO: Double nellow is only valid if partner bids nellow
+
+						// See if current bid is a valid player's bid. If it is, we're replacing an existing bid.
+						if (m_currentBid->GetPlayerId() < NUM_OF_PLAYERS)
+						{	// This bid has been superseded
+							// Set this player's action to "Outbid"
+							emit PlayerActionChanged(m_currentBid->GetPlayerId(), "Bid: Outbid");
+						}
+
+						// Update the current bid
+						m_currentBid = playerBid;
+
+						// Set this player's action to their bid
+						QString bidMsg = QString("Bid: %1").arg(m_currentBid->GetBidText());
+						emit PlayerActionChanged(m_currentBid->GetPlayerId(), bidMsg);
+					}
+					else
+					{	// New bid isn't > current bid
+						QMessageBox msgBox;
+						QString msg = QString("%1, your bid of %2 is invalid.")
+						    .arg(*GetPlayerName(bidder)).arg(playerBid->GetBidText());
+						QString informativeMsg = QString("The current game bid is %1, and has a score of %2.\nThe score of your bid is %3.\n\rSelect Ok to Pass on bidding, or select Cancel to re-bid.")
+						    .arg(m_currentBid->GetBidText()).arg(m_currentBid->GetScore()).arg(playerBid->GetScore());
+						msgBox.setText(msg);
+						msgBox.setInformativeText(informativeMsg);
+						msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
+						msgBox.setDefaultButton(QMessageBox::Ok);
+						int ret = msgBox.exec();
+						if (ret == QMessageBox::Ok)
+						{	// The user has accepted a "Pass"
+							// Don't update current bid.
+							// We're done
+							validBidOrPass = true;
+							emit PlayerActionChanged(bidder, "Bid: Passed");
+						}
+						else
+						{	// User has cancelled, meaning they want to rebid
+							// Leave validBidOrPass false.
+							// The while loop will redo the bidding dialog
+							validBidOrPass = false;
+						}
+					}
+				}
+				else
+				{	// The player passed
+					// Don't update current bid.
+					// We're done
+					validBidOrPass = true;
+					emit PlayerActionChanged(bidder, "Bid: Passed");
+				}
+			}
+			else
+			{	/* The user aborted the bid box
+				 * What does that mean, they want to abort the game?
+				 * Let's assume that's true. Otherwise, if they did want to, we'd be stuck in the bidding modal dialog,
+				 * and they couldn't get to the main window to close it.
+				 */
+				exit(EXIT_SUCCESS);
+			}
+		}	// while
+
+	}	// for
+
+	return someoneBid;
 }
 
-void gameLogic_500::SetBidPlayerID(uint ID)
-{
-	this->m_bidStatus.playerID = ID;
-}
-
-gameLogic_500::bidT *gameLogic_500::GetBid()
-{
-	return &(this->m_bidStatus);
-}
-
-void gameLogic_500::ReturnAllCards()
+void logic::ReturnAllCards()
 {
 	// Return all cards from the players and the kitty
-	for (uint playerIndex = 0; playerIndex < m_numOfHands; playerIndex++)
+	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
 	{
 		m_player[playerIndex]->RemoveAllCardsFromHand();
 	}
 }
 
-void gameLogic_500::Deal()
+void logic::Deal()
 {
 	ReturnAllCards();
 	deck->Shuffle();
 	DealCards();
 }
 
-void gameLogic_500::DealCards()
+void logic::DealCards()
 {
 	// Deal all cards
 	// 10 go to each player, and 5 to the kitty.
@@ -178,8 +274,8 @@ void gameLogic_500::DealCards()
 
 		// Advance to the next player
 		// We include the kitty in this sequence, but if it's not time to deal to the kitty, we'll skip it.
-		playerIndex = advanceIndex(playerIndex, m_numOfHands);
-		if (playerIndex == m_KittyIndex)
+		playerIndex = advanceIndex(playerIndex, NUM_OF_HANDS);
+		if (playerIndex == KITTY_INDEX)
 		{	// Next index is to deal to the kitty
 			if (dealToKittyThisPass)
 			{	// Do nothing with the index. We're going to do that on the next pass.
@@ -189,7 +285,7 @@ void gameLogic_500::DealCards()
 			else
 			{	// We're not going to deal to the kitty
 				// Advance the pointer again, past the kitty
-				playerIndex = advanceIndex(playerIndex, m_numOfHands);
+				playerIndex = advanceIndex(playerIndex, NUM_OF_HANDS);
 				// Set the flag for the next pass.
 				dealToKittyThisPass = true;
 			}
@@ -199,64 +295,14 @@ void gameLogic_500::DealCards()
 	}	// while
 }
 
-/******************************************************************************************************************
- * Starting with the player to the left of the dealer, get bids.
- * Verify each successive bid is > than the current bid. When the dealer has bid, bidding is complete.
- * Return to the calling function.
- *
- *
- * Inputs:
- *	None passed, but m_bidStatus is updated as we go through each player.
- *
- * Outputs:
- *	m_bidStatus: Keeps track of the current and winning bid.
- *
- * Notes:
- *	If no player bids, it's up to the claling function to check for this, and reshuffle the cards.
- ******************************************************************************************************************/
-void gameLogic_500::Bid()
-{
-	// Get the bid for each player, starting to the left of the dealer
-	m_activePlayer = m_dealer + 1;
-	for (uint i=0; i < (m_numOfHands-1); i++)
-	{
-		QString playerName(m_PlayerInfo[m_activePlayer].name);
-		//playerInstruction->((m_PlayerInfo[playerIndex].name);
-		UserBidDialog dialog(&playerName, this);
-		//userBidForm.setWindowModality(Qt::Modaless);
-		// bidUI.setModal(true);	// Block until the user enters a bid
 
-		/* Connect signals/slots
-		 * I had trouble getting the connection to work from within the dialog.
-		 * It works making the connection here. Do this by default.
-		 *
-		 * old format: connect(&dialog, SIGNAL(BidComplete(gameLogic_500::bid_suit,uint)), this, SLOT(SetBid(gameLogic_500::bid_suit,uint)));
-		 */
-		connect(&dialog, &UserBidDialog::BidComplete, this, &gameLogic_500::SetBid);
 
-		auto test = dialog.exec();
-		if (test == QDialog::Accepted)
-		{
-			m_activePlayer = advanceIndex(m_activePlayer, (m_numOfHands-1));
-		}
-		else
-		{	/* The user aborted the bid box
-			 * What does that mean, they want to abort the game?
-			 * Let's assume that's true. Otherwise, if they did want to, we'd be stuck in the bidding modal dialog,
-			 * and they couldn't get to the main window to close it.
-			 */
-			exit(EXIT_SUCCESS);
-		}
-	}
-
-}
-
-void gameLogic_500::CardClicked(uint player, uint card)
+void logic::CardClicked(uint player, uint card)
 {
 	Card *playerCard = nullptr;
 	uint cardRotation = 0;
 	// Find the player that matches our player index
-	for (uint playerIndex = 0; playerIndex < m_numOfHands; playerIndex++)
+	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
 	{
 		if (m_player[playerIndex]->GetID() == player)
 		{	// This is the player who's card was clicked
@@ -280,7 +326,7 @@ void gameLogic_500::CardClicked(uint player, uint card)
 	// else, this card hasn't been dealt yet or we didn't find it
 }
 
-void gameLogic_500::AddCardToPlayer(Player *player, Card *card)
+void logic::AddCardToPlayer(Player *player, Card *card)
 {
 	//cout << "player=" << playerIndex << ", card=" << cardIndex << endl;
 
@@ -303,15 +349,6 @@ void gameLogic_500::AddCardToPlayer(Player *player, Card *card)
 	}
 	else
 	{
-		throw out_of_range("gameLogic_500::AddCardToPlayer: Couldn't add card to player.");
+		throw out_of_range("logic::AddCardToPlayer: Couldn't add card to player.");
 	}
-}
-
-uint gameLogic_500:: advanceIndex(uint index, const uint max)
-{
-	++index;
-	if (index >= max) {
-		index = 0;
-	}
-	return index;
 }

@@ -2,7 +2,8 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "gamelogic_500.h"
+#include "logic.h"
+
 #include "clickableqlabel.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -15,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	 * https://mayaposch.wordpress.com/2011/11/01/how-to-really-truly-use-qthreads-the-full-explanation/
 	 */
 	//QThread *gameLogicThread = new QThread;
-	gameLogic_500 *gameLogic = new gameLogic_500(/*this*/);
+	logic *gameLogic = new logic(/*this*/);
 	//gameLogic->moveToThread(gameLogicThread);
 
 	// Make Signal connections
@@ -35,66 +36,66 @@ MainWindow::MainWindow(QWidget *parent) :
 	//connect(gameLogicThread, SIGNAL (finished()), gameLogicThread, SLOT (deleteLater()));
 
 	// Connect signals/slots for menu bar items
-	connect(ui->actionNewGame, &QAction::triggered, gameLogic, &gameLogic_500::NewGame);
-	connect(ui->actionDeal,    &QAction::triggered, gameLogic, &gameLogic_500::Deal);
-	connect(ui->actionBid,     &QAction::triggered, gameLogic, &gameLogic_500::Bid);
+	connect(ui->actionNewGame, &QAction::triggered, gameLogic, &logic::NewGame);
+	connect(ui->actionDeal,    &QAction::triggered, gameLogic, &logic::Deal);
+	connect(ui->actionBid,     &QAction::triggered, gameLogic, &logic::GetBids);
 	connect(ui->actionQuit,    &QAction::triggered, qApp,      &QApplication::quit);
 
 	// Connect game logic events to slots to update the GUI
-	connect(gameLogic,       &gameLogic_500::PlayerNameChanged,   this, &MainWindow::SetPlayerName);
-	connect(gameLogic,       &gameLogic_500::PlayerActionChanged, this, &MainWindow::SetPlayerAction);
-	connect(gameLogic,       &gameLogic_500::PlayerCardChanged,   this, &MainWindow::SetPlayerCardImage);
+	connect(gameLogic,       &logic::PlayerNameChanged,   this, &MainWindow::SetPlayerName);
+	connect(gameLogic,       &logic::PlayerActionChanged, this, &MainWindow::SetPlayerAction);
+	connect(gameLogic,       &logic::PlayerCardChanged,   this, &MainWindow::SetPlayerCardImage);
 
 	// Connect GUI events to game logic slots
-	connect(ui->lbl_P1C1,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P1C2,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P1C3,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P1C4,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P1C5,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P1C6,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P1C7,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P1C8,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P1C9,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P1C10,   &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
+	connect(ui->lbl_P1C1,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P1C2,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P1C3,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P1C4,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P1C5,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P1C6,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P1C7,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P1C8,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P1C9,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P1C10,   &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
 
-	connect(ui->lbl_P2C1,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P2C2,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P2C3,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P2C4,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P2C5,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P2C6,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P2C7,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P2C8,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P2C9,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P2C10,   &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
+	connect(ui->lbl_P2C1,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P2C2,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P2C3,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P2C4,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P2C5,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P2C6,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P2C7,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P2C8,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P2C9,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P2C10,   &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
 
-	connect(ui->lbl_P3C1,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P3C2,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P3C3,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P3C4,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P3C5,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P3C6,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P3C7,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P3C8,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P3C9,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P3C10,   &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);;
+	connect(ui->lbl_P3C1,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P3C2,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P3C3,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P3C4,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P3C5,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P3C6,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P3C7,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P3C8,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P3C9,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P3C10,   &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);;
 
-	connect(ui->lbl_P4C1,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P4C2,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P4C3,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P4C4,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P4C5,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P4C6,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P4C7,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P4C8,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P4C9,    &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_P4C10,   &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
+	connect(ui->lbl_P4C1,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P4C2,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P4C3,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P4C4,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P4C5,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P4C6,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P4C7,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P4C8,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P4C9,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P4C10,   &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
 
-	connect(ui->lbl_KittyC1, &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_KittyC2, &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_KittyC3, &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_KittyC4, &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
-	connect(ui->lbl_KittyC5, &ClickableQLabel::clicked, gameLogic, &gameLogic_500::CardClicked);
+	connect(ui->lbl_KittyC1, &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_KittyC2, &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_KittyC3, &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_KittyC4, &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_KittyC5, &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
 
 	// Setup the playing table, and start the game
 	gameLogic->SetupTable();

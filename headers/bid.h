@@ -89,6 +89,21 @@ class Bid : public QWidget
 		QString GetSuitText();
 
 		/******************************************************************************************************************
+		 * Get a QString that indicates the bid, such as "6 Clubs" or "Nellow".
+		 *
+		 * Inputs:
+		 *	m_numOfTricks:	The current number of tricks bid.
+		 *	m_bidSuit:			The current bid suit.
+		 *
+		 * Outputs:
+		 *  Returns a QString with the text of the bid.
+		 *
+		 * Notes:
+		 *	None
+		 ******************************************************************************************************************/
+		QString GetBidText();
+
+		/******************************************************************************************************************
 		 * Checks if this bid is valid (has a score > 0).
 		 *
 		 * Inputs
