@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Card Game 500</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_4">
@@ -682,8 +682,6 @@
     </property>
     <addaction name="separator"/>
     <addaction name="actionNewGame"/>
-    <addaction name="actionDeal"/>
-    <addaction name="actionBid"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuHelp">

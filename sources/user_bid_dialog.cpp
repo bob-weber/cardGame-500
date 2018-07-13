@@ -4,13 +4,17 @@
 #include "user_bid_dialog.h"
 #include "ui_user_bid_dialog.h"
 
-UserBidDialog::UserBidDialog(QString *name, Bid *parentBid, QWidget *parent) :
+UserBidDialog::UserBidDialog(uint bidderId, QString bidderName, QWidget *parent) :
   QDialog(parent),
   ui(new Ui::UserBidDialog)
 {
 	ui->setupUi(this);
-	this->m_bidderName = name;
-	this->m_parentBid = parentBid;
+	this->m_bidderName = bidderName;
+
+	// Create a local copy of this player's bid, setting the specified Id
+	m_playerBid = new Bid();
+	m_playerBid->Clear();
+	m_playerBid->SetPlayerId(bidderId);
 
 	// Set icons for suits
 	QIcon *icon = new QIcon(":/resources/Suits/spade.svg");
@@ -29,7 +33,7 @@ UserBidDialog::UserBidDialog(QString *name, Bid *parentBid, QWidget *parent) :
 	ui->rb_NoTrump->setIcon(*icon);
 
 	// Update the introduction label
-	QString introduction(*m_bidderName);
+	QString introduction(m_bidderName);
 	introduction.append(", what's your bid?");
 	ui->lbl_Instruction->setText(introduction);
 
@@ -43,43 +47,43 @@ UserBidDialog::~UserBidDialog()
 
 void UserBidDialog::on_rb_Spades_clicked()
 {
-	m_parentBid->SetBidSuit(Bid::BID_SPADES);
+	m_playerBid->SetBidSuit(Bid::BID_SPADES);
 	ui->gb_NumTricks->setEnabled(true);
 	controlBidPushButton();
 }
 
 void UserBidDialog::on_rb_Clubs_clicked()
 {
-	m_parentBid->SetBidSuit(Bid::BID_CLUBS);
+	m_playerBid->SetBidSuit(Bid::BID_CLUBS);
 	ui->gb_NumTricks->setEnabled(true);
 	controlBidPushButton();
 }
 
 void UserBidDialog::on_rb_Diamonds_clicked()
 {
-	m_parentBid->SetBidSuit(Bid::BID_DIAMONDS);
+	m_playerBid->SetBidSuit(Bid::BID_DIAMONDS);
 	ui->gb_NumTricks->setEnabled(true);
 	controlBidPushButton();
 }
 
 void UserBidDialog::on_rb_Hearts_clicked()
 {
-	m_parentBid->SetBidSuit(Bid::BID_HEARTS);
+	m_playerBid->SetBidSuit(Bid::BID_HEARTS);
 	ui->gb_NumTricks->setEnabled(true);
 	controlBidPushButton();
 }
 
 void UserBidDialog::on_rb_NoTrump_clicked()
 {
-	m_parentBid->SetBidSuit(Bid::BID_NO_TRUMP);
+	m_playerBid->SetBidSuit(Bid::BID_NO_TRUMP);
 	ui->gb_NumTricks->setEnabled(true);
 	controlBidPushButton();
 }
 
 void UserBidDialog::on_rb_Nellow_clicked()
 {
-	m_parentBid->SetNumOfTricks(10);
-	m_parentBid->SetBidSuit(Bid::BID_NELLOW);
+	m_playerBid->SetNumOfTricks(10);
+	m_playerBid->SetBidSuit(Bid::BID_NELLOW);
 	ui->rb_10Tricks->setChecked(true);
 	ui->gb_NumTricks->setEnabled(false);
 	controlBidPushButton();
@@ -87,8 +91,8 @@ void UserBidDialog::on_rb_Nellow_clicked()
 
 void UserBidDialog::on_rb_OpenNellow_clicked()
 {
-	m_parentBid->SetNumOfTricks(10);
-	m_parentBid->SetBidSuit(Bid::BID_OPEN_NELLOW);
+	m_playerBid->SetNumOfTricks(10);
+	m_playerBid->SetBidSuit(Bid::BID_OPEN_NELLOW);
 	ui->rb_10Tricks->setChecked(true);
 	ui->gb_NumTricks->setEnabled(false);
 	controlBidPushButton();
@@ -96,8 +100,8 @@ void UserBidDialog::on_rb_OpenNellow_clicked()
 
 void UserBidDialog::on_rb_DoubleNellow_clicked()
 {
-	m_parentBid->SetNumOfTricks(10);
-	m_parentBid->SetBidSuit(Bid::BID_DOUBLE_NELLOW);
+	m_playerBid->SetNumOfTricks(10);
+	m_playerBid->SetBidSuit(Bid::BID_DOUBLE_NELLOW);
 	ui->rb_10Tricks->setChecked(true);
 	ui->gb_NumTricks->setEnabled(false);
 	controlBidPushButton();
@@ -105,38 +109,39 @@ void UserBidDialog::on_rb_DoubleNellow_clicked()
 
 void UserBidDialog::on_rb_6Tricks_clicked()
 {
-	m_parentBid->SetNumOfTricks(6);
+	m_playerBid->SetNumOfTricks(6);
 	controlBidPushButton();
 }
 
 void UserBidDialog::on_rb_7Tricks_clicked()
 {
-	m_parentBid->SetNumOfTricks(7);
+	m_playerBid->SetNumOfTricks(7);
 	controlBidPushButton();
 }
 
 void UserBidDialog::on_rb_8Tricks_clicked()
 {
-	m_parentBid->SetNumOfTricks(8);
+	m_playerBid->SetNumOfTricks(8);
 	controlBidPushButton();
 }
 
 void UserBidDialog::on_rb_9Tricks_clicked()
 {
-	m_parentBid->SetNumOfTricks(9);
+	m_playerBid->SetNumOfTricks(9);
 	controlBidPushButton();
 }
 
 void UserBidDialog::on_rb_10Tricks_clicked()
 {
-	m_parentBid->SetNumOfTricks(10);
+	m_playerBid->SetNumOfTricks(10);
 	controlBidPushButton();
 }
 
 void UserBidDialog::on_pb_Bid_clicked()
 {
-	QString msg = QString("%1, you bid %2.").arg(*m_bidderName).arg(m_parentBid->GetBidText());
+	QString msg = QString("%1, you bid %2.").arg(m_bidderName).arg(m_playerBid->GetBidText());
 	QMessageBox msgBox;
+	msgBox.setWindowTitle("Verify Your Bid");
 	msgBox.setText(msg);
 	msgBox.setInformativeText("Is this correct?");
 	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -145,6 +150,7 @@ void UserBidDialog::on_pb_Bid_clicked()
 	if (ret == QMessageBox::Yes)
 	{
 		// User has verified the bid.
+		emit PlayerHasBid(m_playerBid);
 		this->accept();
 	}
 	// else, user has cancelled the bid. Stay in this dialog
@@ -153,8 +159,9 @@ void UserBidDialog::on_pb_Bid_clicked()
 
 void UserBidDialog::on_pb_Pass_clicked()
 {
-	QString msg = QString("%1, you passed (no tricks).").arg(*m_bidderName);
+	QString msg = QString("%1, you passed (no tricks).").arg(m_bidderName);
 	QMessageBox msgBox;
+	msgBox.setWindowTitle("You're Passing?");
 	msgBox.setText(msg);
 	msgBox.setInformativeText("Is this correct?");
 	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -163,7 +170,8 @@ void UserBidDialog::on_pb_Pass_clicked()
 	if (ret == QMessageBox::Yes)
 	{
 		// User has verified the bid. Clear the bid.
-		m_parentBid->Clear();
+		m_playerBid->Clear();
+		emit PlayerHasBid(m_playerBid);
 		this->accept();
 	}
 	// else, user has cancelled the bid. Stay in this dialog
@@ -173,7 +181,7 @@ void UserBidDialog::on_pb_Pass_clicked()
 void UserBidDialog::controlBidPushButton()
 {
 	// See if we have a valid, non-zero bid
-	ui->pb_Bid->setEnabled(m_parentBid->IsValid());
+	ui->pb_Bid->setEnabled(m_playerBid->IsValid());
 }
 
 void UserBidDialog::controlNumOfTricksRadioButtons(bool enable)

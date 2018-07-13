@@ -22,7 +22,6 @@ int Score::m_teamScore[NUM_OF_TEAMS] = { 0, 0 };
 
 Score::Score(QObject *parent) : QObject(parent)
 {
-
 }
 
 void Score::ClearTeamScores()

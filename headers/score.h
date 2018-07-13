@@ -5,13 +5,15 @@
 
 #include "game_settings.h"
 #include "bid.h"
+/**********************************************************************************************************************
+ * This class manages the bidding score and team scores.
+ **********************************************************************************************************************/
 
 class Score : public QObject
 {
 		Q_OBJECT
 
 	public:
-
 		/******************************************************************************************************************
 		 * Constructor for the class. Clears all scores when a new instance is created.
 		 *

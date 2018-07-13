@@ -11,11 +11,18 @@ class Player : public QObject
 		explicit Player(QObject *parent = nullptr);
 		~Player();
 
-		Q_PROPERTY(uint m_ID
-		           READ GetID
-		           WRITE SetID)
-		uint GetID() const;
-		void SetID(uint);
+		Q_PROPERTY(uint m_teamId
+		           READ GetTeamId
+		           WRITE SetTeamId)
+		uint GetTeamId() const;
+		void SetTeamId(uint);
+
+		Q_PROPERTY(QString m_playerName
+		           READ GetPlayerName
+		           WRITE SetPlayerName)
+		QString GetPlayerName();
+		void SetPlayerName(QString name);
+
 
 		Q_PROPERTY(uint m_maxNumOfCards
 		           READ GetMaxNumOfCards
@@ -103,7 +110,8 @@ class Player : public QObject
 
 	private:
 
-		uint m_ID;			// Index we'll pass to the GUI to add cards to the hand
+		uint m_teamId;
+		QString m_playerName;
 		uint m_currentNumOfCards;
 		uint m_maxNumOfCards;
 		uint m_cardRotation;

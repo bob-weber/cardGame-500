@@ -9,6 +9,7 @@
   * Complete. Bids are verified to be valid, including double nellow, which requires partner bid nellow.
   * Bids are displayed on the table as they're made.
   * Invalid bids result in player being able to rebid.
+- [ ] Add card play to merge winning bid with kitty.
 - [ ] Test card play for validity/prevent illegal moves
 - [ ] Add scoring
 - [ ] Pop-up after each hand, indicating:

@@ -36,7 +36,10 @@ SOURCES += \
     sources/user_bid_dialog.cpp \
     sources/logic.cpp \
     sources/utilities.cpp \
-    sources/bid.cpp
+    sources/bid.cpp \
+    sources/mergecards.cpp \
+    sources/score.cpp \
+    sources/bidding.cpp
 
 HEADERS += \
     headers/card.h \
@@ -48,7 +51,10 @@ HEADERS += \
     headers/logic.h \
     headers/game_settings.h \
     headers/utilities.h \
-    headers/bid.h
+    headers/bid.h \
+    headers/mergecards.h \
+    headers/bidding.h \
+    headers/score.h
 
 FORMS += \
     mainwindow.ui \

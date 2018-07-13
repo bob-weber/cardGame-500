@@ -1,10 +1,15 @@
 #include <QWidget>
+#include "game_settings.h"
 
 #include "bid.h"
 
-Bid::Bid(uint playerID, uint numOfTricks, bidSuitT suit, QWidget *parent) : QWidget(parent)
+const QString Bid::m_bidSuitText[BID_NUM_OF_SUITS] = {
+  "Spades", "Clubs", "Diamonds", "Hearts", "No Trump", "Nellow", "Open Nellow", "Double Nellow"
+};
+
+Bid::Bid(uint playerId, uint numOfTricks, bidSuitT suit, QObject *parent) : QObject(parent)
 {
-	this->m_playerId = playerID;
+	this->m_playerId = playerId;
 	this->m_numOfTricks = numOfTricks;
 	this->m_bidSuit = suit;
 }
@@ -68,26 +73,15 @@ QString Bid::GetBidText()
 
 bool Bid::IsValid()
 {
-	bool validBid = (m_bidSuit < BID_NUM_OF_SUITS) &&
+	bool validBid = (m_playerId < NUM_OF_PLAYERS) &&
+	                (m_bidSuit < BID_NUM_OF_SUITS) &&
 	                (m_numOfTricks > 0) && (m_numOfTricks <= NUM_OF_CARDS_PER_PLAYER);
 	return validBid;
-}
-
-uint Bid::GetScore()
-{
-	uint bidScore = 0;
-	if (IsValid())
-	{
-		// Note that the scoring table has no entry for 0 tricks. It starts at 1, so we need to -1 from # of tricks.
-		bidScore = Score[m_bidSuit][m_numOfTricks-1];
-	}
-	return bidScore;
 }
 
 void Bid::Clear()
 {
 	m_playerId = NUM_OF_PLAYERS;
 	m_numOfTricks = 0;
-	m_bidSuit = Bid::BID_NUM_OF_SUITS;
+	m_bidSuit = BID_NUM_OF_SUITS;
 }
-

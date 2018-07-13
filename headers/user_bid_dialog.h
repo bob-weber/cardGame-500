@@ -41,10 +41,11 @@ class UserBidDialog : public QDialog
 		 *
 		 * Notes:
 		 ******************************************************************************************************************/
-		explicit UserBidDialog(QString *name, Bid *parentBid, QWidget *parent = 0);
+		explicit UserBidDialog(uint bidderId, QString bidderName, QWidget *parent = 0);
 		~UserBidDialog();
 
 	signals:
+		void PlayerHasBid(Bid* bid);
 
 	private slots:
 		/******************************************************************************************************************
@@ -85,8 +86,8 @@ class UserBidDialog : public QDialog
 		Ui::UserBidDialog *ui;
 
 		// player info
-		Bid *m_parentBid;
-		QString *m_bidderName;
+		Bid* m_playerBid;
+		QString m_bidderName;
 
 		/******************************************************************************************************************
 		 * Enables/disables all of the "number of tricks" radio buttons.

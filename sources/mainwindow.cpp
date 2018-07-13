@@ -37,14 +37,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	// Connect signals/slots for menu bar items
 	connect(ui->actionNewGame, &QAction::triggered, gameLogic, &logic::NewGame);
-	connect(ui->actionDeal,    &QAction::triggered, gameLogic, &logic::Deal);
-	connect(ui->actionBid,     &QAction::triggered, gameLogic, &logic::GetBids);
 	connect(ui->actionQuit,    &QAction::triggered, qApp,      &QApplication::quit);
 
 	// Connect game logic events to slots to update the GUI
-	connect(gameLogic,       &logic::PlayerNameChanged,   this, &MainWindow::SetPlayerName);
-	connect(gameLogic,       &logic::PlayerActionChanged, this, &MainWindow::SetPlayerAction);
-	connect(gameLogic,       &logic::PlayerCardChanged,   this, &MainWindow::SetPlayerCardImage);
+	connect(gameLogic, &logic::PlayerNameChanged,   this, &MainWindow::SetPlayerName);
+	connect(gameLogic, &logic::PlayerActionChanged, this, &MainWindow::SetPlayerAction);
+	connect(gameLogic, &logic::TeamNameChanged,     this, &MainWindow::SetTeamName);
+	connect(gameLogic, &logic::TeamScoreChanged,    this, &MainWindow::SetTeamScore);
+	connect(gameLogic, &logic::PlayerCardChanged,   this, &MainWindow::SetPlayerCardImage);
+
 
 	// Connect GUI events to game logic slots
 	connect(ui->lbl_P1C1,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
@@ -99,7 +100,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	// Setup the playing table, and start the game
 	gameLogic->SetupTable();
-	gameLogic->PlayGame();
+	// gameLogic->NewGame();
 
 	// Start the game thread, which will call PlayGame, due to the signal/slot connection.
 	//gameLogicThread->start();
@@ -116,47 +117,80 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
-void MainWindow::SetPlayerName(const unsigned int player, const QString name)
+void MainWindow::SetPlayerName(const uint playerId, const QString name)
 {
-	/*const*/ QLabel *lblNamePtrs[m_NumOfPlayers] =
-	{
-	  ui->lbl_P1Name, ui->lbl_P2Name, ui->lbl_P3Name, ui->lbl_P4Name, nullptr
+	static QLabel* const lblNamePtrs[NUM_OF_PLAYERS] = {
+	  ui->lbl_P1Name, ui->lbl_P2Name, ui->lbl_P3Name, ui->lbl_P4Name
 	};
 
-	if (player < m_NumOfPlayers)
+	if (playerId < NUM_OF_PLAYERS)
 	{
-		/*const*/ QLabel *label = lblNamePtrs[player];
-		if (label != nullptr)
-		{
+		QLabel *label = nullptr;
+		label = lblNamePtrs[playerId];
+		if (label != nullptr) {
 			label->setText(name);
 		}
 	}
 	// else, ignore this request
 }
 
-void MainWindow::SetPlayerAction(const unsigned int player, const QString &action)
+void MainWindow::SetPlayerAction(const uint playerId, const QString action)
 {
-	/*const*/ QLabel *lblActionPtrs[m_NumOfPlayers] =
-	{
-	  ui->lbl_P1Action, ui->lbl_P2Action, ui->lbl_P3Action, ui->lbl_P4Action, nullptr
+	static QLabel* const lblActionPtrs[NUM_OF_PLAYERS] = {
+	  ui->lbl_P1Action, ui->lbl_P2Action, ui->lbl_P3Action, ui->lbl_P4Action
 	};
 
-	if (player < m_NumOfPlayers)
+	if (playerId < NUM_OF_PLAYERS)
 	{
-		/*const*/ QLabel *label = lblActionPtrs[player];
-		if (label != nullptr)
-		{emit
+		QLabel *label = nullptr;
+		label = lblActionPtrs[playerId];
+		if (label != nullptr) {
 			label->setText(action);
 		}
 	}
 	// else, ignore this request
 }
 
-void MainWindow::SetPlayerCardImage(uint player, uint cardIndex, QImage image, uint rotation)
+void MainWindow::SetTeamName(const uint teamId, const QString name)
 {
-	QLabel *label = nullptr;
+	static QLabel* const lblTeamNamePtrs[NUM_OF_TEAMS] =	{
+	  ui->lbl_NameTeam1, ui->lbl_NameTeam2
+	};
 
-	/*const*/ QLabel *lblCardPtrs[m_NumOfPlayers][m_NumOfCards] =
+	if (teamId < NUM_OF_TEAMS)
+	{
+		QLabel *label = nullptr;
+		label = lblTeamNamePtrs[teamId];
+		if (label != nullptr) {
+			label->setText(name);
+		}
+		// else, invalid ptr. This should never happen; it'd be a logic error.
+	}
+	// else, ignore this invalid request
+}
+
+void MainWindow::SetTeamScore(const uint teamId, const int teamScore)
+{
+	static QLabel* const lblTeamScorePtrs[NUM_OF_TEAMS] =	{
+	  ui->lbl_Score1, ui->lbl_Score2
+	};
+
+	if (teamId < NUM_OF_TEAMS)
+	{
+		QLabel *label = nullptr;
+		label = lblTeamScorePtrs[teamId];
+		if (label != nullptr) {
+			QString score = QString("%1").arg(teamScore);
+			label->setText(score);
+		}
+		// else, invalid ptr. This should never happen; it'd be a logic error.
+	}
+	// else, ignore this invalid request
+}
+
+void MainWindow::SetPlayerCardImage(uint player, uint cardIndex, QImage image, uint rotation, bool raised)
+{
+	static QLabel* const lblCardPtrs[NUM_OF_HANDS][NUM_OF_CARDS_PER_PLAYER] =
 	{
 	  {	ui->lbl_P1C1, ui->lbl_P1C2, ui->lbl_P1C3, ui->lbl_P1C4, ui->lbl_P1C5, ui->lbl_P1C6, ui->lbl_P1C7, ui->lbl_P1C8, ui->lbl_P1C9, ui->lbl_P1C10 	},	// Player 1
 	  {	ui->lbl_P2C1, ui->lbl_P2C2, ui->lbl_P2C3, ui->lbl_P2C4, ui->lbl_P2C5, ui->lbl_P2C6, ui->lbl_P2C7, ui->lbl_P2C8, ui->lbl_P2C9, ui->lbl_P2C10 	},	// Player 2
@@ -165,18 +199,31 @@ void MainWindow::SetPlayerCardImage(uint player, uint cardIndex, QImage image, u
 	  {	ui->lbl_KittyC1, ui->lbl_KittyC2, ui->lbl_KittyC3, ui->lbl_KittyC4, ui->lbl_KittyC5, nullptr, nullptr, nullptr, nullptr, nullptr }	// kitty
 	};
 
-	if ((player < m_NumOfPlayers) && (cardIndex < m_NumOfCards))
+	if ((player < NUM_OF_HANDS) && (cardIndex < NUM_OF_CARDS_PER_PLAYER))
 	{
 		// Get the right label
+		QLabel *label = nullptr;
 		label = lblCardPtrs[player][cardIndex];
+		if (label != nullptr)
+		{
+			// Rotate the image
+			QMatrix matrix;
+			matrix.rotate(rotation);
+			QImage rotatedImage = image.transformed(matrix);
 
-		// Rotate the image
-		QMatrix matrix;
-		matrix.rotate(rotation);
-		QImage rotatedImage = image.transformed(matrix);
+			// Update the image on the screen
+			label->setPixmap(QPixmap::fromImage(rotatedImage));
 
-		// Update the image on the screen
-		label->setPixmap(QPixmap::fromImage(rotatedImage));
+			if (raised)
+			{	// Raise the card
+				label->setFrameStyle(QFrame::Panel | QFrame::Raised);
+			}
+			else
+			{	// Lower it
+				label->setFrameStyle(QFrame::Panel | QFrame::NoFrame);
+			}
+		}
+		// else we don't have this label on the table top
 	}
 	// else, ignore this request
 }

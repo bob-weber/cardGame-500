@@ -12,23 +12,27 @@ Player::~Player()
 
 }
 
-void Player::SetID(uint ID)
-{
-	this->m_ID = ID;
+uint Player::GetTeamId() const {
+	return this->m_teamId;
 }
 
-uint Player::GetID() const
-{
-	return this->m_ID;
+void Player::SetTeamId(uint Id) {
+	this->m_teamId = Id;
 }
 
-uint Player::GetMaxNumOfCards() const
-{
+QString Player::GetPlayerName() {
+	return this->m_playerName;
+}
+
+void Player::SetPlayerName(QString name) {
+	this->m_playerName = name;
+}
+
+uint Player::GetMaxNumOfCards() const {
 	return this->m_maxNumOfCards;
 }
 
-void Player::SetMaxNumOfCards(uint numOfCards)
-{
+void Player::SetMaxNumOfCards(uint numOfCards) {
 	this->m_maxNumOfCards = numOfCards;
 
 	// Now that we know how many cards we have,	allocate an array of cards
@@ -40,23 +44,19 @@ void Player::SetMaxNumOfCards(uint numOfCards)
 	}
 }
 
-uint Player::GetCurrentNumOfCards() const
-{
+uint Player::GetCurrentNumOfCards() const {
 	return this->m_currentNumOfCards;
 }
 
-void Player::SetCurrentNumOfCards(uint numOfCards)
-{
+void Player::SetCurrentNumOfCards(uint numOfCards) {
 	this->m_currentNumOfCards = numOfCards;
 }
 
-uint Player::GetCardRotation() const
-{
+uint Player::GetCardRotation() const {
 	return this->m_cardRotation;
 }
 
-void Player::SetCardRotation(uint rotation)
-{
+void Player::SetCardRotation(uint rotation) {
 	this->m_cardRotation = rotation;
 }
 

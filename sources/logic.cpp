@@ -4,16 +4,15 @@
 #include "player.h"
 #include "game_settings.h"
 #include "utilities.h"
-#include "bid.h"
-#include "user_bid_dialog.h"
-
+#include "bidding.h"
+#include "score.h"
 
 #include "logic.h"
 
 using namespace std;
 
 
-logic::logic(QWidget *parent) : QWidget(parent)
+logic::logic(QObject *parent) : QObject(parent)
 {
 	/* Allocate player instances in the constructor
 	 * Since we delete them in the destructor, it's more logical to allocate them here, rather than rely on
@@ -23,11 +22,10 @@ logic::logic(QWidget *parent) : QWidget(parent)
 	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
 	{
 		m_player[playerIndex] = new Player();
-
 	}
 
 	/* Do not do other initialization here that relies on signals and slots.
-	 * The parent sets up these connections. We;ll do this in SetupTable(), which the parent will call.
+	 * The parent sets up these connections. We'll do this in SetupTable(), which the parent will call.
 	 */
 }
 
@@ -38,39 +36,52 @@ void logic::SetupTable()
 	 ********************************************************************************************************************/
 	// Create a deck
 	deck = new Deck(Deck::DECK_4S_AND_UP, 1, 1);
-	deck->Print();
+	//deck->Print();
 
-	// Initialize the playersDealCards
-	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
+	// Initialize the players
+	for (uint playerIndex = 0; playerIndex < NUM_OF_PLAYERS; playerIndex++)
 	{
 		// Set each player's ID
-		m_player[playerIndex]->SetID(m_PlayerInfo[playerIndex].GUI_ID);
+		Player *player = m_player[playerIndex];
+		player->SetPlayerName(m_PlayerInfo[playerIndex].name);
+		player->SetTeamId(m_PlayerInfo[playerIndex].teamID);
 
 		// All players start of with no cards
-		m_player[playerIndex]->SetCurrentNumOfCards(0);
-
-		// Max # of cards depends on whether this is a normal player or the kitty
-		m_player[playerIndex]->SetMaxNumOfCards(m_PlayerInfo[playerIndex].maxNumOfCards);
-
-		if (playerIndex < KITTY_INDEX)
-		{	// Not the kitty
-			// Update the player's GUI name
-			emit PlayerNameChanged(m_PlayerInfo[playerIndex].GUI_ID, m_PlayerInfo[playerIndex].name);
-			emit PlayerActionChanged(m_PlayerInfo[playerIndex].GUI_ID, "");
-		}
-
+		player->SetCurrentNumOfCards(0);
+		player->SetMaxNumOfCards(NUM_OF_CARDS_PER_PLAYER);
 		// Set the card's rotation on the GUI
-		m_player[playerIndex]->SetCardRotation(m_PlayerInfo[playerIndex].cardRotation);
-	}
+		player->SetCardRotation(m_PlayerInfo[playerIndex].cardRotation);
 
-	/* Create the currently valid bid
-	 * We use this throughout the game.
-	 * The player ID is set to NUM_OF_PLAYERS, which isn't a valid ID.
-	 */
-	m_currentBid = new Bid();
+		emit PlayerNameChanged(playerIndex, player->GetPlayerName());
+		emit PlayerActionChanged(playerIndex, "");
+	}	// for each player
 
-	// Start dealing with player 0
+	// Initialize the kitty
+	Player *kitty = m_player[KITTY_INDEX];
+	kitty->SetPlayerName(m_PlayerInfo[KITTY_INDEX].name);
+	kitty->SetCurrentNumOfCards(0);
+	kitty->SetMaxNumOfCards(NUM_OF_CARDS_IN_KITTY);
+	kitty->SetCardRotation(m_PlayerInfo[KITTY_INDEX].cardRotation);
+
+	// Initialize Score
+	QString teamName = QString("%1/%2").arg(m_player[0]->GetPlayerName()).arg(m_player[2]->GetPlayerName());
+	emit TeamNameChanged(0, teamName);
+	teamName = QString("%1/%2").arg(m_player[1]->GetPlayerName()).arg(m_player[3]->GetPlayerName());
+	emit TeamNameChanged(1, teamName);
+
+	m_gameScore = new Score();
+	m_gameScore->ClearTeamScores();
+	emit TeamScoreChanged(0, m_gameScore->GetTeamScore(0));
+	emit TeamScoreChanged(1, m_gameScore->GetTeamScore(1));
+
+	// Deal cards so we replace the label text with the card images.
 	m_dealer = 0;
+	DealCards();
+
+	// Game is idle until the player takes some action
+	m_gameState = GAME_IDLE;
+	//m_WaitingForStateComplete = false;
+
 }
 
 
@@ -85,214 +96,66 @@ logic::~logic()
 }
 
 
-uint logic::GetDealer() const
-{
+uint logic::GetDealer() const {
 	return this->m_dealer;
 }
 
-void logic::SetDealer(uint dealer)
-{
+void logic::SetDealer(uint dealer) {
 	this->m_dealer = dealer;
 }
 
-QString *logic::GetPlayerName(uint playerIndex)
-{
+QString *logic::GetPlayerName(uint playerIndex) {
 	return &m_PlayerInfo[playerIndex].name;
-}
-
-
-void logic::PlayGame()
-{
-	/********************************************************************************************************************
-	 * Start a new game
-	 * This returns when the game is complete.
-	 ********************************************************************************************************************/
-	Deal();
-	//NewGame();
-
-	// TODO: pop-up to display winner
 }
 
 void logic::NewGame()
 {
+	m_gameState = GAME_NEW_GAME;
 	// The deal starts with player 0
-	m_dealer = m_PlayerInfo[0].GUI_ID;
-
-	// Get bids from each player
-	m_currentBid->Clear();
-	bool successfulBid = false;
-	while (!successfulBid)
-	{
-		Deal();
-
-		successfulBid = GetBids();
-		if (!successfulBid)
-		{
-			QMessageBox msgBox;
-			msgBox.setText("No one bid. We'll redeal and try again.");
-			msgBox.setInformativeText("No valid bid");
-			msgBox.setStandardButtons(QMessageBox::Ok);
-			msgBox.setDefaultButton(QMessageBox::Ok);
-			msgBox.exec();
-		}
-	}	// while
-
-	//PlayHand();
-	//Score();
+	m_dealer = 0;
+	m_gameScore->ClearTeamScores();
+	NewHand();
 }
 
-bool logic::GetBids()
+void logic::NewHand()
 {
-	// Bidding starts left of the dealer. Set to dealer. We'll advance it below.
-	uint bidder = m_dealer;
+	m_gameState = GAME_NEW_HAND;
+	// Return all cards, shuffle the deck, and deal
+	// All of these are non-blocking.
+	ReturnAllCards();
+	deck->Shuffle();
+	DealCards();
+	GetBids();
+}
 
-	// Set all player actions to waiting to bid
-	QString bidMsg = QString("Waiting");
-	for (uint i=0; i < NUM_OF_PLAYERS; i++)
-	{
-		emit PlayerActionChanged(m_PlayerInfo[i].GUI_ID, bidMsg);
+void logic::GetBids()
+{
+	m_gameState = GAME_BID;
+	/* Create a bidding object, passing a reference to player info.
+	 */
+	Bidding *bidding = new Bidding();
+	connect(bidding, &Bidding::PlayerActionChanged, this, &logic::PlayerActionChanged);
+	bidding->GetAllBids(m_dealer, m_player);
+	// When done, "bidding" will emit BiddingComplete().
+}
+
+void logic::BiddingComplete(Bid *bid)
+{
+	if (bid->IsValid())
+	{	// We have a valid bid for this hand
+		m_currentBid = bid;
+		MergeKittyWithHand();
 	}
-
-	// Get a bid for each player
-	bool someoneBid = false;
-	m_nellowTeamId = NUM_OF_PLAYERS;
-	for (uint i=0; i < NUM_OF_PLAYERS; i++)
-	{
-		// start bidding to the left of the dealer
-		bidder = advanceIndex(bidder, NUM_OF_PLAYERS);
-		emit PlayerActionChanged(bidder, "Bidding");
-		uint bidScore;
-
-		bool validBidOrPass = false;
-		while (!validBidOrPass)
-		{
-			// This is the start of a player's bidding, so zero out the player's bid
-			Bid *playerBid = new Bid(bidder, 0, Bid::BID_NUM_OF_SUITS);
-			UserBidDialog dialog(GetPlayerName(bidder), playerBid);
-			auto test = dialog.exec();
-			if (test == QDialog::Accepted)
-			{	// The player completed their bid or passed
-				bidScore = playerBid->GetScore();
-				if (bidScore > 0)
-				{	// The player bid something
-					if (bidScore > m_currentBid->GetScore())
-					{	// This bid is > than our current bid
-						if (playerBid->GetBidSuit() == Bid::BID_NELLOW)
-						{	// Save nellow bid info in case someone later bids double nellow
-							/* We don't need to verify nellow hasn't already been bid in this round
-							 * because if it had, bidScore wouldn't be > the current score.
-							 */
-							validBidOrPass = true;
-							m_nellowTeamId = m_PlayerInfo[bidder].teamID;
-						}
-						else if (playerBid->GetBidSuit() == Bid::BID_DOUBLE_NELLOW)
-						{
-							// Double nellow is only valid if partner bid nellow
-							if (m_PlayerInfo[bidder].teamID == m_nellowTeamId)
-							{	// This is a valid double nellow bid
-								validBidOrPass = true;
-							}
-							// else, invalid double nellow bid
-						}
-						else
-						{	// Valid suit/# of tricks bid
-							validBidOrPass = true;
-						}
-					}
-					else
-					{	// Bid doesn't exceed current bid
-					}
-				}
-				else
-				{	// No bid
-					validBidOrPass = true;
-				}
-
-				if (validBidOrPass)
-				{	// Bid is valid
-					if (bidScore > 0)
-					{	// This is an actual bid
-						someoneBid = true;
-
-						// See if current bid is a valid player's bid. If it is, we're replacing an existing bid.
-						if (m_currentBid->GetPlayerId() < NUM_OF_PLAYERS)
-						{	// This bid has been superseded
-							// Set this player's action to "Outbid"
-							emit PlayerActionChanged(m_currentBid->GetPlayerId(), "Bid: Outbid");
-						}
-
-						// Update the current bid
-						m_currentBid = playerBid;
-
-						// Set this player's action to their bid
-						QString bidMsg = QString("Bid: %1").arg(m_currentBid->GetBidText());
-						emit PlayerActionChanged(m_currentBid->GetPlayerId(), bidMsg);
-					}
-					else
-					{	// This player passed
-						emit PlayerActionChanged(bidder, "Bid: Passed");
-					}
-				}
-				else
-				{	/* Not a valid bid
-					 * This is because one of the following are true:
-					 * 1. The bid amount score is < the current bid, or
-					 * 2. The bid is double nellow, but their partner hasn't bid nellow
-					 */
-					if (playerBid->GetBidSuit() == Bid::BID_DOUBLE_NELLOW)
-					{	// Invalid double nellow bid
-						QMessageBox msgBox;
-						QString msg = QString("%1, your bid of %2 is invalid.")
-						    .arg(*GetPlayerName(bidder)).arg(playerBid->GetBidText());
-						QString informativeMsg = QString("%1 requires your parter bid Nellow.\n\rSelect Ok to re-bid.")
-						    .arg(playerBid->GetBidText()).arg(m_currentBid->GetScore()).arg(playerBid->GetScore());
-						msgBox.setText(msg);
-						msgBox.setInformativeText(informativeMsg);
-						msgBox.setStandardButtons(QMessageBox::Ok);
-						msgBox.setDefaultButton(QMessageBox::Ok);
-						msgBox.exec();
-						// validBidOrPass == false will result in user rebidding
-					}
-					else
-					{	// Bid score is too low
-						QMessageBox msgBox;
-						QString msg = QString("%1, your bid of %2 is invalid.")
-						    .arg(*GetPlayerName(bidder)).arg(playerBid->GetBidText());
-						QString informativeMsg = QString("The current game bid is %1, and has a score of %2.\nThe score of your bid is %3.\n\rSelect Ok to Pass on bidding, or select Cancel to re-bid.")
-						    .arg(m_currentBid->GetBidText()).arg(m_currentBid->GetScore()).arg(playerBid->GetScore());
-						msgBox.setText(msg);
-						msgBox.setInformativeText(informativeMsg);
-						msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
-						msgBox.setDefaultButton(QMessageBox::Ok);
-						int ret = msgBox.exec();
-						if (ret == QMessageBox::Ok)
-						{	// The user has accepted a "Pass"
-							// Don't update current bid.
-							// We're done
-							validBidOrPass = true;
-							emit PlayerActionChanged(bidder, "Bid: Passed");
-						}
-						else
-						{	// User has cancelled, meaning they want to rebid
-							// Leave validBidOrPass false.
-							// The while loop will redo the bidding dialog
-						}
-					}
-				}
-			}
-			else
-			{	/* The user aborted the bid box
-				 * What does that mean, they want to abort the game?
-				 * Let's assume that's true. Otherwise, if they did want to, we'd be stuck in the bidding modal dialog,
-				 * and they couldn't get to the main window to close it.
-				 */
-				exit(EXIT_SUCCESS);
-			}
-		}	// while
-
-	}	// for
-
-	return someoneBid;
+	else
+	{	// No one bid
+		QMessageBox msgBox;
+		msgBox.setText("No one bid. We'll redeal and try again.");
+		msgBox.setInformativeText("No valid bid");
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
+		msgBox.exec();
+		NewHand();
+	}
 }
 
 void logic::ReturnAllCards()
@@ -304,13 +167,6 @@ void logic::ReturnAllCards()
 	}
 }
 
-void logic::Deal()
-{
-	ReturnAllCards();
-	deck->Shuffle();
-	DealCards();
-}
-
 void logic::DealCards()
 {
 	// Deal all cards
@@ -320,7 +176,7 @@ void logic::DealCards()
 	uint cardIndex = 0;
 	while (cardIndex < deck->GetTotalCardCount())
 	{
-		AddCardToPlayer(m_player[playerIndex], deck->GetNextCard());
+		AddCardToPlayer(playerIndex, deck->GetNextCard());
 		++cardIndex;
 
 		// Advance to the next player
@@ -348,58 +204,164 @@ void logic::DealCards()
 
 
 
-void logic::CardClicked(uint player, uint card)
+void logic::CardClicked(uint playerId, uint cardHandIndex)
 {
-	Card *playerCard = nullptr;
-	uint cardRotation = 0;
-	// Find the player that matches our player index
-	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
+	// TODO: Get rid of player ID in player info. Rely on the order of players specified in the GUI.
+	// Then we can get rid of this search.
+	uint playerIndex;
+	for (playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
 	{
-		if (m_player[playerIndex]->GetID() == player)
+		if (playerIndex == playerId)
 		{	// This is the player who's card was clicked
-			playerCard = m_player[playerIndex]->GetCard(card);
-			cardRotation = m_player[playerIndex]->GetCardRotation();
 			break;
 		}
 		// else, not the correct player
 	}	// for
 
+	/* For the clicked card, either:
+	 * 1. If we're merging the kitty with the winning bidder's hand, and this is either:
+	 *	  a) a card from the kitty, or
+	 *    b) a card from the winning bidder
+	 *    Then raise that card.
+	 *    Leave the rotation and orientation.
+	 * 2. Else, if we're not merging the kitty with the winning bidder's hand, or this is a
+	 *    non-bidder's hand:
+	 *    Then flip the card's orientation.
+	 */
+	Card *playerCard = nullptr;
+	playerCard = m_player[playerIndex]->GetCard(cardHandIndex);
 	if (playerCard != nullptr)
-	{	// We have a valid card
-		Card::Orientation orientation = playerCard->FlipOrientation();
-		if (orientation == Card::FACE_DOWN) {
-			emit PlayerCardChanged(player, card, playerCard->GetBackImage(), cardRotation);
+	{
+		bool flipCard = false;
+		bool raiseOrLowerCard = false;
+		switch (m_gameState)
+		{
+			case GAME_MERGE_KITTY:
+				if ((playerId == KITTY_INDEX) || (playerId == m_currentBid->GetPlayerId()))
+				{
+					raiseOrLowerCard = true;
+				}
+				else
+				{	// Not a card used in merging the player's hand and the kitty.
+					// Flip it, like normal.
+					flipCard = true;
+				}
+				break;
+
+			default:
+				// No special action. Flip the card when clicked.
+				flipCard = true;
+				break;
+		}	// switch
+
+		Card::Orientation orientation = playerCard->GetOrientation();
+		if (flipCard) {
+			orientation = playerCard->FlipOrientation();
 		}
-		else {
-			emit PlayerCardChanged(player, card, playerCard->GetFaceImage(), cardRotation);
+
+		uint raiseCard = playerCard->IsRaised();
+		if (raiseOrLowerCard) {
+			raiseCard = !raiseCard;
+			playerCard->SetRaised(raiseCard);
 		}
+
+		// Update the table image
+		UpdateCardOnTable(playerId, cardHandIndex, orientation, playerCard->GetRotation(), raiseCard);
 	}
-	// else, this card hasn't been dealt yet or we didn't find it
 }
 
-void logic::AddCardToPlayer(Player *player, Card *card)
+void logic::AddCardToPlayer(uint playerId, Card *card)
 {
-	//cout << "player=" << playerIndex << ", card=" << cardIndex << endl;
-
 	// Get the next card in the deck and add it to this player's hand.
+	Player *player = m_player[playerId];
 	uint handIndex = player->AddCardToHand(card);
 
 	if (handIndex < player->GetMaxNumOfCards())
 	{	// We successfully added the card to this player's hand
-		QImage image;
-		if (card->GetOrientation() == Card::FACE_DOWN) {
-			image = card->GetBackImage();
-		}
-		else {
-			image = card->GetFaceImage();
-		}
-
-		// Update the GUI with this card.
-		uint cardRotation = player->GetCardRotation();
-		emit PlayerCardChanged(player->GetID(), handIndex, image, cardRotation);
+		// Update the image on the table
+		UpdateCardOnTable(playerId, handIndex, card->GetOrientation(), player->GetCardRotation(), card->IsRaised());
 	}
 	else
 	{
 		throw out_of_range("logic::AddCardToPlayer: Couldn't add card to player.");
 	}
+}
+
+void logic::MergeKittyWithHand()
+{
+	m_gameState = GAME_MERGE_KITTY;
+	/* We're going to allow the user to select cards from the winning bidder and the kitty.
+	 * A pop-up dialog will explain how to perform the merge, and to click the "Ok" button when finished.
+	 * This pop-up needs to be non-modal, so a player can see the cards on the GUI. We'll accomplish this
+	 * by running the merge cards task and dialog in a separate thread.
+	 *
+	 * When the user clicks Ok, and valid cards have been selected, the merge task will exchange the cards
+	 * and exit, returning control to this function.
+	 */
+#if 0
+	// Create the merge task, with the two players who's cards we'll merge.
+	MergeCards *mergeCardsTask = new MergeCards(m_player[m_currentBid->GetPlayerId()], m_player[KITTY_INDEX]);
+	mergeCardsTask->moveToThread(&mergeCardsThread);
+
+	// Connect the thread's start signal to the Start() function
+	connect(&mergeCardsThread, &QThread::started, &mergeCardsTask, &MergeCards::Start);
+	// Remove MergeCards objects when the thead finishes
+	connect(&mergeCardsThread, &QThread::finished, MergeCards, &QObject::deleteLater);
+	// When the merge is complete,
+	// Start the thread
+	mergeCardsThread->start();
+
+	// Wait for the merge task to complete
+	mergeCardsThread->wait();
+
+
+	/* Turn up all the cards in the specified player's hand and in the kitty, so the user can see them.
+	 * When these cards are clicked, instead of flipping over, they'll be raised up to show they're selected.
+	 */
+	uint playerId = m_currentBid->GetPlayerId();
+	for (int cardIndex = 0; cardIndex < NUM_OF_CARDS_PER_PLAYER; cardIndex++)
+	{
+		Card *card = m_player[playerId]->GetCard(cardIndex);
+		card->SetOrientation(Card::FACE_UP);
+		UpdateCardOnTable(playerId, cardIndex, card->GetOrientation(), card->GetRotation(), card->IsRaised());
+	}
+	for (int cardIndex = 0; cardIndex < NUM_OF_CARDS_IN_KITTY; cardIndex++)
+	{
+		Card *card = m_player[KITTY_INDEX]->GetCard(cardIndex);
+		card->SetOrientation(Card::FACE_UP);
+		UpdateCardOnTable(KITTY_INDEX, cardIndex, card->GetOrientation(), card->GetRotation(), card->IsRaised());
+	}
+
+	// Pop up a dialog to enable the user to exchange cards when the appropriate cards have been completed.
+	QMessageBox msgBox;
+	QString msg = QString("%1, merge the kitty with your hand.").arg(m_PlayerInfo[m_currentBid->GetPlayerId()].name);
+	QString informativeMsg = QString("When done, press Ok.");
+	msgBox.setText(msg);
+	msgBox.setInformativeText(informativeMsg);
+	msgBox.setStandardButtons(QMessageBox::Ok);
+	msgBox.setDefaultButton(QMessageBox::Ok);
+	msgBox.setModal(false);
+	msgBox.show() (this, ();
+#endif
+}
+
+void logic::UpdateCardOnTable(uint playerId, uint cardHandIndex, Card::Orientation orientation, uint rotation, bool raised)
+{
+	// Get card that is at this location on the table, and set it's parameters
+	Card *card = m_player[playerId]->GetCard(cardHandIndex);
+	card->SetOrientation(orientation);
+	card->SetRotation(rotation);
+	card->SetRaised(raised);
+
+	// get the proper image
+	QImage cardImage;
+	if (orientation == Card::FACE_UP) {
+		cardImage = card->GetFaceImage();
+	}
+	else {	// Card is face down
+		cardImage = card->GetBackImage();
+	}
+
+	// Update the table image
+	emit PlayerCardChanged(playerId, cardHandIndex, cardImage, rotation, raised);
 }
