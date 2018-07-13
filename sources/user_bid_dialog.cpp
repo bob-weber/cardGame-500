@@ -149,8 +149,17 @@ void UserBidDialog::on_pb_Bid_clicked()
 	int ret = msgBox.exec();
 	if (ret == QMessageBox::Yes)
 	{
+		/* Save the window position, so the next dialog pops up where this is.
+		 * Do this before saving the bid, because the slot for that signal will launch
+		 * the next bidding dialog, and we need to have saved the position first.
+		 */
+		QPoint position = this->pos();
+		emit DialogPositionChanged(position);
+
 		// User has verified the bid.
 		emit PlayerHasBid(m_playerBid);
+
+		// Close this dialog
 		this->accept();
 	}
 	// else, user has cancelled the bid. Stay in this dialog
@@ -169,9 +178,15 @@ void UserBidDialog::on_pb_Pass_clicked()
 	int ret = msgBox.exec();
 	if (ret == QMessageBox::Yes)
 	{
+		// Save the window position
+		QPoint position = this->pos();
+		emit DialogPositionChanged(position);
+
 		// User has verified the bid. Clear the bid.
 		m_playerBid->Clear();
 		emit PlayerHasBid(m_playerBid);
+
+		// Close this dialog
 		this->accept();
 	}
 	// else, user has cancelled the bid. Stay in this dialog

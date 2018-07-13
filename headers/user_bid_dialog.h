@@ -1,6 +1,8 @@
 #ifndef USER_BID_DIALOG_H
 #define USER_BID_DIALOG_H
 #include <QDialog>
+#include <QPoint>
+
 #include "bid.h"
 
 /* This class manages a dialog window to get a user's bid. It verfies that the bid
@@ -37,7 +39,7 @@ class UserBidDialog : public QDialog
 		 *
 		 * Outputs:
 		 *	m_bidderName:	Saved bidder name.
-		 *  m_parentBid:	Saved pointer to the parent class
+		 *  m_parentBid:m_dialogPosition	Saved pointer to the parent class
 		 *
 		 * Notes:
 		 ******************************************************************************************************************/
@@ -45,7 +47,14 @@ class UserBidDialog : public QDialog
 		~UserBidDialog();
 
 	signals:
+		/* Emit a signal notify the bidding logic of a player's bid, or pass.
+		 */
 		void PlayerHasBid(Bid* bid);
+
+		/* Emit a signal to save the position
+		 * This class doesn't save the position since it'll close, and the position would be lost.
+		 */
+		void DialogPositionChanged(QPoint position);
 
 	private slots:
 		/******************************************************************************************************************
@@ -88,6 +97,8 @@ class UserBidDialog : public QDialog
 		// player info
 		Bid* m_playerBid;
 		QString m_bidderName;
+
+		QPoint m_dialogPosition;
 
 		/******************************************************************************************************************
 		 * Enables/disables all of the "number of tricks" radio buttons.

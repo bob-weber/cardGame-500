@@ -49,22 +49,11 @@ class Bidding : public QObject
 	signals:
 		/******************************************************************************************************************
 		 * A signal to update the player's action/status message on the table.
-		 *
-		 * Inputs:	None
-		 *
-		 * Outputs:
-		 *   playerId:	The player Id to update
-		 *	 message:		The action/status message to display
 		 ******************************************************************************************************************/
 		void PlayerActionChanged(uint playerId, QString message);
 
 		/******************************************************************************************************************
 		 * A signal indicating the winning bid to the game logic object.
-		 *
-		 * Inputs:	None
-		 *
-		 * Outputs:
-		 *   bid:		The winning bid
 		 ******************************************************************************************************************/
 		void BiddingIsComplete(Bid *bid);
 
@@ -93,6 +82,19 @@ class Bidding : public QObject
 		 ******************************************************************************************************************/
 		void VerifyPlayerBid(Bid* playerBid);
 
+		/******************************************************************************************************************
+		 * This slot saves the bidding dialog's window position. This is used to open it again, for subsequent bids, in
+		 * the same location.
+		 *
+		 * Inputs
+		 *	 position:			The current position of the dialog box.
+		 *
+		 * Outputs:
+		 *   m_biddingDialogPosition:	Saved position of the dialog box
+		 *
+		 * Notes:	None
+		 ******************************************************************************************************************/
+		void SaveDialogPosition(QPoint position);
 
 	private:
 		/******************************************************************************************************************
@@ -117,6 +119,8 @@ class Bidding : public QObject
 		Player** m_players;				// Player information
 		uint m_nellowTeamId;			// Id of team that bid nellow
 		uint m_completedBidCount;	// How many players have completed bidding
+
+		QPoint m_biddingDialogPosition;	// Position of the dialog box
 };
 
 #endif // BIDDING_H

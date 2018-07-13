@@ -26,6 +26,11 @@ void Bidding::GetAllBids(uint dealer, Player** players)
 	m_bidder = dealer;
 	m_players = players;
 
+	// Initialize the position of the dialog box
+	// TODO: It'd be nice to save this to the file system, so it survives bids in later hands, and game restarts.
+	m_biddingDialogPosition.setX(0);
+	m_biddingDialogPosition.setY(0);
+
 	// Set all player actions to waiting to bid
 	QString bidMsg = QString("Waiting");
 	for (uint i=0; i < NUM_OF_PLAYERS; i++)
@@ -56,9 +61,11 @@ void Bidding::GetOneBid()
 	// Make it non-modal so the user can interface with the tabletop
 	UserBidDialog *dialog = new UserBidDialog(m_bidder, player->GetPlayerName());
 	dialog->setModal(false);
+	dialog->move(m_biddingDialogPosition);
 
 	// connect this object's signals
 	connect(dialog, &UserBidDialog::PlayerHasBid, this, &Bidding::VerifyPlayerBid);
+	connect(dialog, &UserBidDialog::DialogPositionChanged, this, &Bidding::SaveDialogPosition);
 
 	// When the dialog completes, it'll call BiddingIsComplete();
 	dialog->show();
@@ -187,4 +194,10 @@ void Bidding::VerifyPlayerBid(Bid* playerBid)
 		// Do not advance he bidder, and get a new bid for this player
 		GetOneBid();
 	}
+}
+
+
+void Bidding::SaveDialogPosition(QPoint position)
+{
+	m_biddingDialogPosition = position;
 }

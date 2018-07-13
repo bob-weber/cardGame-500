@@ -1,4 +1,5 @@
 # Phase 0
+## Major tasks
 * Goall: Working game, with manual play. User must control each player's hand.
 - [x] Add card rotation
 - [x] Add Menu new game
@@ -16,6 +17,10 @@
   * score for that round
   * total game score
 - [ ] Handle completing a game
+
+## Minor tasks
+- [ ] Save game settings to a file, accessible to various dialogs, like window position.
+  - [ ] Then save bidding dialog position, so bidding on different rounds can get the position.
 
 # Phase 0.5
 - [ ] Add testing for card class
