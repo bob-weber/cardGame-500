@@ -31,9 +31,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     unittests.cpp \
     test_score.cpp \
-    ../../sources/score.cpp
+    ../../sources/score.cpp \
+    test_bid.cpp \
+    ../../sources/bid.cpp
 
 HEADERS += \
     test_score.h \
     ../../headers/score.h \
-    ../../headers/game_settings.h
+    ../../headers/game_settings.h \
+    test_bid.h \
+    ../../headers/bid.h
