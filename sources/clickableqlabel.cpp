@@ -1,3 +1,4 @@
+#include "game_settings.h"
 #include "clickableqlabel.h"
 
 ClickableQLabel::ClickableQLabel(QWidget* parent, Qt::WindowFlags f)
@@ -69,7 +70,9 @@ void ClickableQLabel::mousePressEvent(QMouseEvent* event)
 	};
 
 	QString name = this->objectName();
-	for (uint i = 0; i < 45; i++)
+	for (uint i = 0;
+	     i < ((NUM_OF_PLAYERS * NUM_OF_CARDS_PER_PLAYER) + NUM_OF_CARDS_IN_KITTY);
+	     i++)
 	{
 		if (playerCardLookup[i].labelName == name)
 		{	// Found the correct player/card

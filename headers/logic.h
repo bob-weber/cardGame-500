@@ -33,13 +33,17 @@ class logic : public QObject
 		void PlayerActionChanged(uint player, QString action);
 		void TeamNameChanged(uint teamId, QString name);
 		void TeamScoreChanged(uint teamId, int teamScore);
-		void PlayerCardChanged(uint player, uint card, QImage image, uint rotation, bool raised);
+		void SetPlayerCard(uint playerId, uint cardIndex, Card* card);
+		void CardChanged(uint playerId, uint cardIndex);
 		void GetPlayerBids(uint dealer, Player **playersInfo);
+		void CardSelected(uint playerId, bool cardIsRaised);
 
 	public slots:
 		void CardClicked(uint player, uint card);
 		void NewGame();
 		void BiddingComplete(Bid *bid);
+		void MergingCardsComplete();
+		//void UpdateCardOnTable(uint player, uint card, Card::Orientation orientation, uint rotation, bool raised);
 
 	protected:
 		typedef struct {
@@ -127,7 +131,8 @@ class logic : public QObject
 		 *
 		 * Notes:
 		 ******************************************************************************************************************/
-		void UpdateCardOnTable(uint player, uint card, Card::Orientation orientation, uint rotation, bool raised);
+
+		void TurnPlayersCards(uint playerId, Card::Orientation orientation);
 
 		// Keep track of what state we're in
 		enum GameStateT { GAME_IDLE, GAME_NEW_GAME, GAME_NEW_HAND, GAME_BID, GAME_MERGE_KITTY, GAME_PLAY_HAND, GAME_SCORE };

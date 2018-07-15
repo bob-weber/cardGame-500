@@ -1,30 +1,38 @@
 #ifndef MERGECARDS_H
 #define MERGECARDS_H
 
-#include <QWidget>
+#include <QObject>
+#include <QMessageBox>
+
 #include "player.h"
 #include "card.h"
 
-class MergeCards : public QWidget
+class MergeCards : public QObject
 {
 		Q_OBJECT
 
 	public:
-		explicit MergeCards(Player *player, Player *kitty, QWidget *parent = nullptr);
+		explicit MergeCards(QObject *parent = nullptr);
 
 	public slots:
-		//void CardSelected(uint playerId, uint cardIndex);
-		//void Start();
+		void MergeHands(Player* player, Player* kitty);
 
 	signals:
-		void finished();
+		void MergingComplete();
 
 	public slots:
+		//void CardSelectionChanged(uint playerId, bool cardIsRaised);
 
 	private:
 		Player *m_player;
-		Player *m_ktty;
+		Player *m_kitty;
 
+		// Keep a count of the number of selected cards in the player's hand and the kitty.
+		uint m_kittySelectedCardsCount;
+		uint m_playerSelectedCardsCount;
+
+		// Pointer to msg box, so other functions
+		QMessageBox* m_mergeMsgBox;
 };
 
 #endif // MERGECARDS_H

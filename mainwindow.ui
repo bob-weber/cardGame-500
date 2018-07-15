@@ -15,44 +15,300 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_4">
-    <item row="0" column="0">
+    <item row="1" column="0">
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="5" column="7">
-       <widget class="ClickableQLabel" name="lbl_KittyC2">
+      <item row="3" column="2" rowspan="9" colspan="2">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item alignment="Qt::AlignRight">
+         <widget class="ClickableQLabel" name="lbl_P2C1">
+          <property name="text">
+           <string>P2C1</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignRight">
+         <widget class="ClickableQLabel" name="lbl_P2C2">
+          <property name="text">
+           <string>P2C2</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignRight">
+         <widget class="ClickableQLabel" name="lbl_P2C3">
+          <property name="text">
+           <string>P2C3</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignRight">
+         <widget class="ClickableQLabel" name="lbl_P2C4">
+          <property name="text">
+           <string>P2C4</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignRight">
+         <widget class="ClickableQLabel" name="lbl_P2C5">
+          <property name="text">
+           <string>P2C5</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignRight">
+         <widget class="ClickableQLabel" name="lbl_P2C6">
+          <property name="text">
+           <string>P2C6</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignRight">
+         <widget class="ClickableQLabel" name="lbl_P2C7">
+          <property name="text">
+           <string>P2C7</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignRight">
+         <widget class="ClickableQLabel" name="lbl_P2C8">
+          <property name="text">
+           <string>P2C8</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignRight">
+         <widget class="ClickableQLabel" name="lbl_P2C9">
+          <property name="text">
+           <string>P2C9</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignRight">
+         <widget class="ClickableQLabel" name="lbl_P2C10">
+          <property name="text">
+           <string>P2C10</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="4" column="16">
+       <widget class="QLabel" name="lbl_P4Action">
         <property name="text">
-         <string>KittyC2</string>
+         <string>P4Action</string>
         </property>
        </widget>
       </item>
-      <item row="7" column="7" colspan="3">
-       <widget class="QLabel" name="lbl_63">
+      <item row="10" column="0">
+       <widget class="QLabel" name="lbl_51">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
-      <item row="3" column="10" colspan="2">
-       <widget class="QLabel" name="lbl_25">
+      <item row="3" column="0">
+       <widget class="QLabel" name="lbl_P2Name">
+        <property name="text">
+         <string>P2Name</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="15" rowspan="9">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="topMargin">
+         <number>9</number>
+        </property>
+        <item alignment="Qt::AlignLeft">
+         <widget class="ClickableQLabel" name="lbl_P4C1">
+          <property name="text">
+           <string>P4C1</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignLeft">
+         <widget class="ClickableQLabel" name="lbl_P4C2">
+          <property name="text">
+           <string>P4C2</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignLeft">
+         <widget class="ClickableQLabel" name="lbl_P4C3">
+          <property name="text">
+           <string>P4C3</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignLeft">
+         <widget class="ClickableQLabel" name="lbl_P4C4">
+          <property name="text">
+           <string>P4C4</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignLeft">
+         <widget class="ClickableQLabel" name="lbl_P4C5">
+          <property name="text">
+           <string>P4C5</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignLeft">
+         <widget class="ClickableQLabel" name="lbl_P4C6">
+          <property name="text">
+           <string>P4C6</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignLeft">
+         <widget class="ClickableQLabel" name="lbl_P4C7">
+          <property name="text">
+           <string>P4C7</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignLeft">
+         <widget class="ClickableQLabel" name="lbl_P4C8">
+          <property name="text">
+           <string>P4C8</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignLeft">
+         <widget class="ClickableQLabel" name="lbl_P4C9">
+          <property name="text">
+           <string>P4C9</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignLeft">
+         <widget class="ClickableQLabel" name="lbl_P4C10">
+          <property name="text">
+           <string>P4C10</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="7" column="16">
+       <widget class="QLabel" name="lbl_45">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
-      <item row="3" column="7" colspan="3">
-       <widget class="QLabel" name="llbl_24">
+      <item row="7" column="12">
+       <widget class="QLabel" name="label_3">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
-      <item row="7" column="10" colspan="2">
-       <widget class="QLabel" name="lbl_64">
+      <item row="3" column="14" rowspan="9">
+       <widget class="Line" name="line_4">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="0" colspan="17">
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="16">
+       <widget class="QLabel" name="lbl_75">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
-      <item row="1" column="4" colspan="9">
+      <item row="11" column="16">
+       <widget class="QLabel" name="label_65">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="17">
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="lbl_41">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2" colspan="2">
+       <widget class="QLabel" name="lbl_12">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="15">
+       <widget class="QLabel" name="lbl_74">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lbl_11">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="4" rowspan="9">
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="2" colspan="2">
+       <widget class="QLabel" name="lbl_72">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="lbl_P2Action">
+        <property name="text">
+         <string>P2Action</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="0">
+       <widget class="QLabel" name="lbl_61">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="16">
+       <widget class="QLabel" name="lbl_P4Name">
+        <property name="text">
+         <string>P4Name</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="11">
+       <widget class="ClickableQLabel" name="lbl_KittyC5">
+        <property name="text">
+         <string>KittyC5</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4" colspan="11">
        <layout class="QGridLayout" name="gridLayout">
         <item row="1" column="8">
          <widget class="ClickableQLabel" name="lbl_P3C9">
@@ -146,368 +402,21 @@
         </item>
        </layout>
       </item>
-      <item row="5" column="8">
-       <widget class="ClickableQLabel" name="lbl_KittyC3">
-        <property name="text">
-         <string>KittyC3</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="14">
+      <item row="1" column="16">
        <widget class="QLabel" name="lbl_14">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
-      <item row="3" column="5" colspan="2">
-       <widget class="QLabel" name="lbl_23">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="14">
+      <item row="10" column="16">
        <widget class="QLabel" name="lbl_55">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="lbl_P2Action">
-        <property name="text">
-         <string>P2Action</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="lbl_61">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="5" colspan="2">
-       <widget class="QLabel" name="lbl_62">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="14">
-       <widget class="QLabel" name="lbl_P4Name">
-        <property name="text">
-         <string>P4Name</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2" rowspan="5" colspan="2">
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item alignment="Qt::AlignRight">
-         <widget class="ClickableQLabel" name="lbl_P2C1">
-          <property name="text">
-           <string>P2C1</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignRight">
-         <widget class="ClickableQLabel" name="lbl_P2C2">
-          <property name="text">
-           <string>P2C2</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignRight">
-         <widget class="ClickableQLabel" name="lbl_P2C3">
-          <property name="text">
-           <string>P2C3</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignRight">
-         <widget class="ClickableQLabel" name="lbl_P2C4">
-          <property name="text">
-           <string>P2C4</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignRight">
-         <widget class="ClickableQLabel" name="lbl_P2C5">
-          <property name="text">
-           <string>P2C5</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignRight">
-         <widget class="ClickableQLabel" name="lbl_P2C6">
-          <property name="text">
-           <string>P2C6</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignRight">
-         <widget class="ClickableQLabel" name="lbl_P2C7">
-          <property name="text">
-           <string>P2C7</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignRight">
-         <widget class="ClickableQLabel" name="lbl_P2C8">
-          <property name="text">
-           <string>P2C8</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignRight">
-         <widget class="ClickableQLabel" name="lbl_P2C9">
-          <property name="text">
-           <string>P2C9</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignRight">
-         <widget class="ClickableQLabel" name="lbl_P2C10">
-          <property name="text">
-           <string>P2C10</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="4" column="14">
-       <widget class="QLabel" name="lbl_P4Action">
-        <property name="text">
-         <string>P4Action</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="6">
-       <widget class="ClickableQLabel" name="lbl_KittyC1">
-        <property name="text">
-         <string>KittyC1</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="lbl_51">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="lbl_P2Name">
-        <property name="text">
-         <string>P2Name</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="5">
-       <widget class="QLabel" name="lbl_33">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="13" rowspan="5">
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <property name="topMargin">
-         <number>9</number>
-        </property>
-        <item alignment="Qt::AlignLeft">
-         <widget class="ClickableQLabel" name="lbl_P4C1">
-          <property name="text">
-           <string>P4C1</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignLeft">
-         <widget class="ClickableQLabel" name="lbl_P4C2">
-          <property name="text">
-           <string>P4C2</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignLeft">
-         <widget class="ClickableQLabel" name="lbl_P4C3">
-          <property name="text">
-           <string>P4C3</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignLeft">
-         <widget class="ClickableQLabel" name="lbl_P4C4">
-          <property name="text">
-           <string>P4C4</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignLeft">
-         <widget class="ClickableQLabel" name="lbl_P4C5">
-          <property name="text">
-           <string>P4C5</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignLeft">
-         <widget class="ClickableQLabel" name="lbl_P4C6">
-          <property name="text">
-           <string>P4C6</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignLeft">
-         <widget class="ClickableQLabel" name="lbl_P4C7">
-          <property name="text">
-           <string>P4C7</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignLeft">
-         <widget class="ClickableQLabel" name="lbl_P4C8">
-          <property name="text">
-           <string>P4C8</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignLeft">
-         <widget class="ClickableQLabel" name="lbl_P4C9">
-          <property name="text">
-           <string>P4C9</string>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignLeft">
-         <widget class="ClickableQLabel" name="lbl_P4C10">
-          <property name="text">
-           <string>P4C10</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="5" column="14">
-       <widget class="QLabel" name="lbl_45">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="9">
-       <widget class="ClickableQLabel" name="lbl_KittyC4">
-        <property name="text">
-         <string>KittyC4</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="12" rowspan="5">
-       <widget class="Line" name="line_4">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="11">
-       <widget class="QLabel" name="lbl_34">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0" colspan="15">
-       <widget class="Line" name="line_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="14">
-       <widget class="QLabel" name="lbl_75">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="14">
-       <widget class="QLabel" name="label_65">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="15">
-       <widget class="Line" name="line_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="lbl_41">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2" colspan="2">
-       <widget class="QLabel" name="lbl_12">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="13">
-       <widget class="QLabel" name="lbl_74">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="lbl_11">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="4" rowspan="5">
-       <widget class="Line" name="line">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="2" colspan="2">
-       <widget class="QLabel" name="lbl_72">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="13">
-       <widget class="QLabel" name="lbl_13">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0">
-       <widget class="QLabel" name="lbl_71">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="10">
-       <widget class="ClickableQLabel" name="lbl_KittyC5">
-        <property name="text">
-         <string>KittyC5</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="4" colspan="9">
+      <item row="13" column="4" colspan="11">
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="2" column="7" colspan="2">
          <widget class="ClickableQLabel" name="lbl_P1C7">
@@ -662,6 +571,125 @@
          </widget>
         </item>
        </layout>
+      </item>
+      <item row="1" column="15">
+       <widget class="QLabel" name="lbl_13">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="0">
+       <widget class="QLabel" name="lbl_71">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="5">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="7">
+       <widget class="ClickableQLabel" name="lbl_KittyC1">
+        <property name="text">
+         <string>KittyC1</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="13">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="6">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="5">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="10">
+       <widget class="ClickableQLabel" name="lbl_KittyC4">
+        <property name="text">
+         <string>KittyC4</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="5">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="9">
+       <widget class="ClickableQLabel" name="lbl_KittyC3">
+        <property name="text">
+         <string>KittyC3</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="5">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="8">
+       <widget class="ClickableQLabel" name="lbl_KittyC2">
+        <property name="text">
+         <string>KittyC2</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="5">
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="5">
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="5">
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="5">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="5">
+       <widget class="QLabel" name="label_12">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

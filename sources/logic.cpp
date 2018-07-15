@@ -6,6 +6,7 @@
 #include "utilities.h"
 #include "bidding.h"
 #include "score.h"
+#include "mergecards.h"
 
 #include "logic.h"
 
@@ -135,6 +136,7 @@ void logic::GetBids()
 	 */
 	Bidding *bidding = new Bidding();
 	connect(bidding, &Bidding::PlayerActionChanged, this, &logic::PlayerActionChanged);
+	connect(bidding, &Bidding::BiddingIsComplete, this, &logic::BiddingComplete);
 	bidding->GetAllBids(m_dealer, m_player);
 	// When done, "bidding" will emit BiddingComplete().
 }
@@ -157,6 +159,75 @@ void logic::BiddingComplete(Bid *bid)
 		NewHand();
 	}
 }
+
+
+void logic::MergeKittyWithHand()
+{
+	m_gameState = GAME_MERGE_KITTY;
+	/* We're going to allow the user to select cards from the winning bidder and the kitty.
+	 * A pop-up dialog will explain how to perform the merge, and to click the "Ok" button when finished.
+	 * This pop-up needs to be non-modal, so a player can see the cards on the GUI. We'll accomplish this
+	 * by running the merge cards task and dialog in a separate thread.
+	 *
+	 * When the user clicks Ok, and valid cards have been selected, the merge task will exchange the cards
+	 * and exit, returning control to this function.
+	 */
+
+	// Turn all the cards in the player's hand, and the kitty, face-up
+//	TurnPlayersCards(m_currentBid->GetPlayerId(), Card::FACE_UP);
+//	TurnPlayersCards(KITTY_INDEX, Card::FACE_UP);
+
+	// Create the merge task, with the two players who's cards we'll merge.
+	MergeCards *mergeCards = new MergeCards();
+//	mergeCards->MergeHandsd(m_player[m_currentBid->GetPlayerId()], m_player[KITTY_INDEX]);
+//	connect(this, &logic::CardSelected, mergeCards, &MergeCards::CardSelectionChanged);
+//	connect(mergeCards, &MergeCards::CardChanged, this, &logic::UpdateCardOnTable);
+
+//	        UpdateCardOnTable(uint player, uint card, Card::Orientation orientation, uint rotation, bool isSelected);
+
+}
+
+void logic::MergingCardsComplete()
+{
+	// Todo: Play hand
+}
+
+#if 0
+void logic::TurnPlayersCards(uint playerId, Card::Orientation orientation)
+{
+	uint numOfCardsToFlip = NUM_OF_CARDS_PER_PLAYER;
+	if (playerId == KITTY_INDEX)
+	{	// This is the kitty, not a player
+		numOfCardsToFlip = NUM_OF_CARDS_IN_KITTY;
+	}
+
+	// Set all the cards in this hand face-up or face-down
+	for (int cardIndex = 0; cardIndex < numOfCardsToFlip; cardIndex++)
+	{
+		Card *card = m_player[playerId]->GetCard(cardIndex);
+		card->SetOrientation(orientation);
+		UpdateCardOnTable(playerId, cardIndex, orientation, card->GetRotation(), card->IsRaised());
+	}
+}
+
+
+void logic::SelectPlayersCards(uint playerId, bool isSelected)
+{
+	uint numOfCardsToFlip = NUM_OF_CARDS_PER_PLAYER;
+	if (playerId == KITTY_INDEX)
+	{	// This is the kitty, not a player
+		numOfCardsToFlip = NUM_OF_CARDS_IN_KITTY;
+	}
+
+	// Set all the cards in this hand face-up or face-down
+	for (int cardIndex = 0; cardIndex < numOfCardsToFlip; cardIndex++)
+	{
+		Card *card = m_player[playerId]->GetCard(cardIndex);
+		card->SetOrientation(orientation);
+		UpdateCardOnTable(playerId, cardIndex, orientation, card->GetRotation(), card->IsRaised());
+	}
+}
+#endif
 
 void logic::ReturnAllCards()
 {
@@ -202,22 +273,8 @@ void logic::DealCards()
 	}	// while
 }
 
-
-
 void logic::CardClicked(uint playerId, uint cardHandIndex)
 {
-	// TODO: Get rid of player ID in player info. Rely on the order of players specified in the GUI.
-	// Then we can get rid of this search.
-	uint playerIndex;
-	for (playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
-	{
-		if (playerIndex == playerId)
-		{	// This is the player who's card was clicked
-			break;
-		}
-		// else, not the correct player
-	}	// for
-
 	/* For the clicked card, either:
 	 * 1. If we're merging the kitty with the winning bidder's hand, and this is either:
 	 *	  a) a card from the kitty, or
@@ -228,46 +285,31 @@ void logic::CardClicked(uint playerId, uint cardHandIndex)
 	 *    non-bidder's hand:
 	 *    Then flip the card's orientation.
 	 */
-	Card *playerCard = nullptr;
-	playerCard = m_player[playerIndex]->GetCard(cardHandIndex);
-	if (playerCard != nullptr)
+	Card* playerCard = m_player[playerId]->GetCard(cardHandIndex);
+
+	switch (m_gameState)
 	{
-		bool flipCard = false;
-		bool raiseOrLowerCard = false;
-		switch (m_gameState)
-		{
-			case GAME_MERGE_KITTY:
-				if ((playerId == KITTY_INDEX) || (playerId == m_currentBid->GetPlayerId()))
-				{
-					raiseOrLowerCard = true;
-				}
-				else
-				{	// Not a card used in merging the player's hand and the kitty.
-					// Flip it, like normal.
-					flipCard = true;
-				}
-				break;
+		case GAME_MERGE_KITTY:
+			if ((playerId == KITTY_INDEX) || (playerId == m_currentBid->GetPlayerId()))
+			{	// Toggle if this card is raised or lowered
+				bool cardIsRaised = playerCard->IsRaised();
+				playerCard->SetRaised(!cardIsRaised);
+			}
+			else
+			{	// Not a card used in merging the player's hand and the kitty.
+				// Flip it, like normal.
+				playerCard->FlipOrientation();
+			}
+			break;
 
-			default:
-				// No special action. Flip the card when clicked.
-				flipCard = true;
-				break;
-		}	// switch
+		default:
+			// No special action. Flip the card when clicked.
+			playerCard->FlipOrientation();
+			break;
+	}	// switch
 
-		Card::Orientation orientation = playerCard->GetOrientation();
-		if (flipCard) {
-			orientation = playerCard->FlipOrientation();
-		}
-
-		uint raiseCard = playerCard->IsRaised();
-		if (raiseOrLowerCard) {
-			raiseCard = !raiseCard;
-			playerCard->SetRaised(raiseCard);
-		}
-
-		// Update the table image
-		UpdateCardOnTable(playerId, cardHandIndex, orientation, playerCard->GetRotation(), raiseCard);
-	}
+	// Update the card on the table
+	emit CardChanged(playerId, cardHandIndex);
 }
 
 void logic::AddCardToPlayer(uint playerId, Card *card)
@@ -279,7 +321,9 @@ void logic::AddCardToPlayer(uint playerId, Card *card)
 	if (handIndex < player->GetMaxNumOfCards())
 	{	// We successfully added the card to this player's hand
 		// Update the image on the table
-		UpdateCardOnTable(playerId, handIndex, card->GetOrientation(), player->GetCardRotation(), card->IsRaised());
+		card->SetRotation(player->GetCardRotation());
+		SetPlayerCard(playerId, handIndex, card);
+//		UpdateCardOnTable(playerId, handIndex, card->GetOrientation(), player->GetCardRotation(), card->IsRaised());
 	}
 	else
 	{
@@ -287,71 +331,14 @@ void logic::AddCardToPlayer(uint playerId, Card *card)
 	}
 }
 
-void logic::MergeKittyWithHand()
-{
-	m_gameState = GAME_MERGE_KITTY;
-	/* We're going to allow the user to select cards from the winning bidder and the kitty.
-	 * A pop-up dialog will explain how to perform the merge, and to click the "Ok" button when finished.
-	 * This pop-up needs to be non-modal, so a player can see the cards on the GUI. We'll accomplish this
-	 * by running the merge cards task and dialog in a separate thread.
-	 *
-	 * When the user clicks Ok, and valid cards have been selected, the merge task will exchange the cards
-	 * and exit, returning control to this function.
-	 */
 #if 0
-	// Create the merge task, with the two players who's cards we'll merge.
-	MergeCards *mergeCardsTask = new MergeCards(m_player[m_currentBid->GetPlayerId()], m_player[KITTY_INDEX]);
-	mergeCardsTask->moveToThread(&mergeCardsThread);
-
-	// Connect the thread's start signal to the Start() function
-	connect(&mergeCardsThread, &QThread::started, &mergeCardsTask, &MergeCards::Start);
-	// Remove MergeCards objects when the thead finishes
-	connect(&mergeCardsThread, &QThread::finished, MergeCards, &QObject::deleteLater);
-	// When the merge is complete,
-	// Start the thread
-	mergeCardsThread->start();
-
-	// Wait for the merge task to complete
-	mergeCardsThread->wait();
-
-
-	/* Turn up all the cards in the specified player's hand and in the kitty, so the user can see them.
-	 * When these cards are clicked, instead of flipping over, they'll be raised up to show they're selected.
-	 */
-	uint playerId = m_currentBid->GetPlayerId();
-	for (int cardIndex = 0; cardIndex < NUM_OF_CARDS_PER_PLAYER; cardIndex++)
-	{
-		Card *card = m_player[playerId]->GetCard(cardIndex);
-		card->SetOrientation(Card::FACE_UP);
-		UpdateCardOnTable(playerId, cardIndex, card->GetOrientation(), card->GetRotation(), card->IsRaised());
-	}
-	for (int cardIndex = 0; cardIndex < NUM_OF_CARDS_IN_KITTY; cardIndex++)
-	{
-		Card *card = m_player[KITTY_INDEX]->GetCard(cardIndex);
-		card->SetOrientation(Card::FACE_UP);
-		UpdateCardOnTable(KITTY_INDEX, cardIndex, card->GetOrientation(), card->GetRotation(), card->IsRaised());
-	}
-
-	// Pop up a dialog to enable the user to exchange cards when the appropriate cards have been completed.
-	QMessageBox msgBox;
-	QString msg = QString("%1, merge the kitty with your hand.").arg(m_PlayerInfo[m_currentBid->GetPlayerId()].name);
-	QString informativeMsg = QString("When done, press Ok.");
-	msgBox.setText(msg);
-	msgBox.setInformativeText(informativeMsg);
-	msgBox.setStandardButtons(QMessageBox::Ok);
-	msgBox.setDefaultButton(QMessageBox::Ok);
-	msgBox.setModal(false);
-	msgBox.show() (this, ();
-#endif
-}
-
-void logic::UpdateCardOnTable(uint playerId, uint cardHandIndex, Card::Orientation orientation, uint rotation, bool raised)
+void logic::UpdateCardOnTable(uint playerId, uint cardHandIndex, Card::Orientation orientation, uint rotation, bool isSelected)
 {
 	// Get card that is at this location on the table, and set it's parameters
 	Card *card = m_player[playerId]->GetCard(cardHandIndex);
 	card->SetOrientation(orientation);
 	card->SetRotation(rotation);
-	card->SetRaised(raised);
+	card->SetRaised(isSelected);
 
 	// get the proper image
 	QImage cardImage;
@@ -363,5 +350,6 @@ void logic::UpdateCardOnTable(uint playerId, uint cardHandIndex, Card::Orientati
 	}
 
 	// Update the table image
-	emit PlayerCardChanged(playerId, cardHandIndex, cardImage, rotation, raised);
+	emit PlayerCardChanged(playerId, cardHandIndex, cardImage, rotation, isSelected);
 }
+#endif

@@ -1,16 +1,29 @@
 #include <type_traits>
+#include <QLabel>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "logic.h"
+#include "card.h"
 
 #include "clickableqlabel.h"
+
+Card* MainWindow::playerCards[NUM_OF_HANDS][NUM_OF_CARDS_PER_PLAYER];
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
+
+	// Set the cards for all player's hands to null
+	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
+	{
+		for (uint cardIndex = 0; cardIndex < NUM_OF_CARDS_PER_PLAYER; cardIndex++)
+		{
+			playerCards[cardIndex][playerIndex] = nullptr;
+		}
+	}
 
 	/* This threading logic follows the example given at
 	 * https://mayaposch.wordpress.com/2011/11/01/how-to-really-truly-use-qthreads-the-full-explanation/
@@ -44,8 +57,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(gameLogic, &logic::PlayerActionChanged, this, &MainWindow::SetPlayerAction);
 	connect(gameLogic, &logic::TeamNameChanged,     this, &MainWindow::SetTeamName);
 	connect(gameLogic, &logic::TeamScoreChanged,    this, &MainWindow::SetTeamScore);
-	connect(gameLogic, &logic::PlayerCardChanged,   this, &MainWindow::SetPlayerCardImage);
-
+	connect(gameLogic, &logic::SetPlayerCard,				this, &MainWindow::NewCard);
+	connect(gameLogic, &logic::CardChanged,					this, &MainWindow::UpdateCardOnTable);
 
 	// Connect GUI events to game logic slots
 	connect(ui->lbl_P1C1,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
@@ -188,9 +201,22 @@ void MainWindow::SetTeamScore(const uint teamId, const int teamScore)
 	// else, ignore this invalid request
 }
 
-void MainWindow::SetPlayerCardImage(uint player, uint cardIndex, QImage image, uint rotation, bool raised)
+void MainWindow::NewCard(uint playerId, uint cardIndex, Card *card)
 {
-	static QLabel* const lblCardPtrs[NUM_OF_HANDS][NUM_OF_CARDS_PER_PLAYER] =
+	// Update the card
+	// Checking the bounds shouldn't be necessary, but we'll be paranoid.
+	if ((playerId < NUM_OF_HANDS) && (cardIndex < NUM_OF_CARDS_PER_PLAYER))
+	{
+		playerCards[playerId][cardIndex] = card;
+	}
+
+	// Update the card image
+	UpdateCardOnTable(playerId, cardIndex);
+}
+
+void MainWindow::UpdateCardOnTable(uint player, uint cardIndex)
+{
+	static QLabel* lblCardPtrs[NUM_OF_HANDS][NUM_OF_CARDS_PER_PLAYER] =
 	{
 	  {	ui->lbl_P1C1, ui->lbl_P1C2, ui->lbl_P1C3, ui->lbl_P1C4, ui->lbl_P1C5, ui->lbl_P1C6, ui->lbl_P1C7, ui->lbl_P1C8, ui->lbl_P1C9, ui->lbl_P1C10 	},	// Player 1
 	  {	ui->lbl_P2C1, ui->lbl_P2C2, ui->lbl_P2C3, ui->lbl_P2C4, ui->lbl_P2C5, ui->lbl_P2C6, ui->lbl_P2C7, ui->lbl_P2C8, ui->lbl_P2C9, ui->lbl_P2C10 	},	// Player 2
@@ -201,26 +227,36 @@ void MainWindow::SetPlayerCardImage(uint player, uint cardIndex, QImage image, u
 
 	if ((player < NUM_OF_HANDS) && (cardIndex < NUM_OF_CARDS_PER_PLAYER))
 	{
-		// Get the right label
-		QLabel *label = nullptr;
-		label = lblCardPtrs[player][cardIndex];
-		if (label != nullptr)
-		{
+		// Get the card we want to update, and it's location on the table
+		QLabel *label = lblCardPtrs[player][cardIndex];
+		Card *card = playerCards[player][cardIndex];
+
+		if ((label != nullptr) && (card != nullptr))
+		{	// We have a valid card, and a valid location to update
 			// Rotate the image
 			QMatrix matrix;
-			matrix.rotate(rotation);
-			QImage rotatedImage = image.transformed(matrix);
+			matrix.rotate(card->GetRotation());
+			QImage rotatedImage;
+			if (card->GetOrientation() == Card::FACE_DOWN) {
+				rotatedImage = card->GetBackImage();
+			}
+			else {
+				rotatedImage = card->GetFaceImage();
+			}
+			rotatedImage = rotatedImage.transformed(matrix);
 
 			// Update the image on the screen
 			label->setPixmap(QPixmap::fromImage(rotatedImage));
 
-			if (raised)
+			if (card->IsRaised())
 			{	// Raise the card
-				label->setFrameStyle(QFrame::Panel | QFrame::Raised);
+				label->setLineWidth(3);
+				label->setFrameStyle(QFrame::Box /*| QFrame::NoFrame*/ | QFrame::Raised);
 			}
 			else
 			{	// Lower it
-				label->setFrameStyle(QFrame::Panel | QFrame::NoFrame);
+				label->setLineWidth(0);
+				label->setFrameStyle(QFrame::Panel);
 			}
 		}
 		// else we don't have this label on the table top
