@@ -16,7 +16,7 @@ class ClickableQLabel : public QLabel
 		~ClickableQLabel();
 
 	signals:
-		void clicked(uint player, uint card);
+		void cardClicked(QString labelName, Qt::MouseButtons buttons);
 
 	protected:
 		void mousePressEvent(QMouseEvent* event);

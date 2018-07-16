@@ -22,7 +22,8 @@ logic::logic(QObject *parent) : QObject(parent)
 	m_player = new Player *[NUM_OF_HANDS];
 	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
 	{
-		m_player[playerIndex] = new Player();
+		m_player[playerIndex] = new Player(playerIndex);
+		connect(m_player[playerIndex], &Player::SetPlayerCard, this, &logic::SetPlayerCard);
 	}
 
 	/* Do not do other initialization here that relies on signals and slots.
@@ -160,7 +161,6 @@ void logic::BiddingComplete(Bid *bid)
 	}
 }
 
-
 void logic::MergeKittyWithHand()
 {
 	m_gameState = GAME_MERGE_KITTY;
@@ -192,42 +192,6 @@ void logic::MergingCardsComplete()
 	// Todo: Play hand
 }
 
-#if 0
-void logic::TurnPlayersCards(uint playerId, Card::Orientation orientation)
-{
-	uint numOfCardsToFlip = NUM_OF_CARDS_PER_PLAYER;
-	if (playerId == KITTY_INDEX)
-	{	// This is the kitty, not a player
-		numOfCardsToFlip = NUM_OF_CARDS_IN_KITTY;
-	}
-
-	// Set all the cards in this hand face-up or face-down
-	for (int cardIndex = 0; cardIndex < numOfCardsToFlip; cardIndex++)
-	{
-		Card *card = m_player[playerId]->GetCard(cardIndex);
-		card->SetOrientation(orientation);
-		UpdateCardOnTable(playerId, cardIndex, orientation, card->GetRotation(), card->IsRaised());
-	}
-}
-
-
-void logic::SelectPlayersCards(uint playerId, bool isSelected)
-{
-	uint numOfCardsToFlip = NUM_OF_CARDS_PER_PLAYER;
-	if (playerId == KITTY_INDEX)
-	{	// This is the kitty, not a player
-		numOfCardsToFlip = NUM_OF_CARDS_IN_KITTY;
-	}
-
-	// Set all the cards in this hand face-up or face-down
-	for (int cardIndex = 0; cardIndex < numOfCardsToFlip; cardIndex++)
-	{
-		Card *card = m_player[playerId]->GetCard(cardIndex);
-		card->SetOrientation(orientation);
-		UpdateCardOnTable(playerId, cardIndex, orientation, card->GetRotation(), card->IsRaised());
-	}
-}
-#endif
 
 void logic::ReturnAllCards()
 {
@@ -247,7 +211,7 @@ void logic::DealCards()
 	uint cardIndex = 0;
 	while (cardIndex < deck->GetTotalCardCount())
 	{
-		AddCardToPlayer(playerIndex, deck->GetNextCard());
+		m_player[playerIndex]->AddCardToHand(deck->GetNextCard());
 		++cardIndex;
 
 		// Advance to the next player
@@ -273,83 +237,3 @@ void logic::DealCards()
 	}	// while
 }
 
-void logic::CardClicked(uint playerId, uint cardHandIndex)
-{
-	/* For the clicked card, either:
-	 * 1. If we're merging the kitty with the winning bidder's hand, and this is either:
-	 *	  a) a card from the kitty, or
-	 *    b) a card from the winning bidder
-	 *    Then raise that card.
-	 *    Leave the rotation and orientation.
-	 * 2. Else, if we're not merging the kitty with the winning bidder's hand, or this is a
-	 *    non-bidder's hand:
-	 *    Then flip the card's orientation.
-	 */
-	Card* playerCard = m_player[playerId]->GetCard(cardHandIndex);
-
-	switch (m_gameState)
-	{
-		case GAME_MERGE_KITTY:
-			if ((playerId == KITTY_INDEX) || (playerId == m_currentBid->GetPlayerId()))
-			{	// Toggle if this card is raised or lowered
-				bool cardIsRaised = playerCard->IsRaised();
-				playerCard->SetRaised(!cardIsRaised);
-			}
-			else
-			{	// Not a card used in merging the player's hand and the kitty.
-				// Flip it, like normal.
-				playerCard->FlipOrientation();
-			}
-			break;
-
-		default:
-			// No special action. Flip the card when clicked.
-			playerCard->FlipOrientation();
-			break;
-	}	// switch
-
-	// Update the card on the table
-	emit CardChanged(playerId, cardHandIndex);
-}
-
-void logic::AddCardToPlayer(uint playerId, Card *card)
-{
-	// Get the next card in the deck and add it to this player's hand.
-	Player *player = m_player[playerId];
-	uint handIndex = player->AddCardToHand(card);
-
-	if (handIndex < player->GetMaxNumOfCards())
-	{	// We successfully added the card to this player's hand
-		// Update the image on the table
-		card->SetRotation(player->GetCardRotation());
-		SetPlayerCard(playerId, handIndex, card);
-//		UpdateCardOnTable(playerId, handIndex, card->GetOrientation(), player->GetCardRotation(), card->IsRaised());
-	}
-	else
-	{
-		throw out_of_range("logic::AddCardToPlayer: Couldn't add card to player.");
-	}
-}
-
-#if 0
-void logic::UpdateCardOnTable(uint playerId, uint cardHandIndex, Card::Orientation orientation, uint rotation, bool isSelected)
-{
-	// Get card that is at this location on the table, and set it's parameters
-	Card *card = m_player[playerId]->GetCard(cardHandIndex);
-	card->SetOrientation(orientation);
-	card->SetRotation(rotation);
-	card->SetRaised(isSelected);
-
-	// get the proper image
-	QImage cardImage;
-	if (orientation == Card::FACE_UP) {
-		cardImage = card->GetFaceImage();
-	}
-	else {	// Card is face down
-		cardImage = card->GetBackImage();
-	}
-
-	// Update the table image
-	emit PlayerCardChanged(playerId, cardHandIndex, cardImage, rotation, isSelected);
-}
-#endif

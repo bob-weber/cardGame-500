@@ -22,7 +22,7 @@ Card::Card(Card::Pip pip, Card::Suit suit, Card::Orientation orientation, unsign
 	QImage image = QImage(pathStr);
 	QSize imageSize = image.size() / m_imageSizeDivisor;
 	this->m_faceImage = image.scaled(imageSize);
-	this->m_raised = false;		// Start of not raised up
+	this->m_Selected = false;		// Start of not raised up
 }
 
 Card::~Card()
@@ -87,14 +87,14 @@ void Card::SetRotation(unsigned int rotation) {
 	}
 }
 
-bool Card::IsRaised() const
+bool Card::IsSelected() const
 {
-	return this->m_raised;
+	return this->m_Selected;
 }
 
-void Card::SetRaised(bool raise)
+void Card::SetSelected(bool raise)
 {
-	this->m_raised = raise;
+	this->m_Selected = raise;
 }
 
 QImage Card::GetFaceImage()

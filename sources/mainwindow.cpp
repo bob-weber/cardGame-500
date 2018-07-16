@@ -1,52 +1,94 @@
 #include <type_traits>
 #include <QLabel>
+#include <QSignalMapper>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "clickableqlabel.h"
 #include "logic.h"
 #include "card.h"
 
 #include "clickableqlabel.h"
 
-Card* MainWindow::playerCards[NUM_OF_HANDS][NUM_OF_CARDS_PER_PLAYER];
+// Card* MainWindow::playerCards[NUM_OF_HANDS][NUM_OF_CARDS_PER_PLAYER];
+
+//using namespace Ui_MainWindow;
+MainWindow::CardMappingT MainWindow::playerCards[NUM_OF_HANDS][NUM_OF_CARDS_PER_PLAYER] =
+{
+  {	// Player 1
+    { "lbl_P1C1",  nullptr },
+    { "lbl_P1C2",  nullptr },
+    { "lbl_P1C3",  nullptr },
+    { "lbl_P1C4",  nullptr },
+    { "lbl_P1C5",  nullptr },
+    { "lbl_P1C6",  nullptr },
+    { "lbl_P1C7",  nullptr },
+    { "lbl_P1C8",  nullptr },
+    { "lbl_P1C9",  nullptr },
+    { "lbl_P1C10", nullptr },
+  },
+
+  {	// Player 2
+    { "lbl_P2C1",  nullptr },
+    { "lbl_P2C2",  nullptr },
+    { "lbl_P2C3",  nullptr },
+    { "lbl_P2C4",  nullptr },
+    { "lbl_P2C5",  nullptr },
+    { "lbl_P2C6",  nullptr },
+    { "lbl_P2C7",  nullptr },
+    { "lbl_P2C8",  nullptr },
+    { "lbl_P2C9",  nullptr },
+    { "lbl_P2C10", nullptr },
+  },
+
+  {	// Player 3
+    { "lbl_P3C1",  nullptr },
+    { "lbl_P3C2",  nullptr },
+    { "lbl_P3C3",  nullptr },
+    { "lbl_P3C4",  nullptr },
+    { "lbl_P3C5",  nullptr },
+    { "lbl_P3C6",  nullptr },
+    { "lbl_P3C7",  nullptr },
+    { "lbl_P3C8",  nullptr },
+    { "lbl_P3C9",  nullptr },
+    { "lbl_P3C10", nullptr },
+  },
+
+  {	// Player 4
+    { "lbl_P4C1",  nullptr },
+    { "lbl_P4C2",  nullptr },
+    { "lbl_P4C3",  nullptr },
+    { "lbl_P4C4",  nullptr },
+    { "lbl_P4C5",  nullptr },
+    { "lbl_P4C6",  nullptr },
+    { "lbl_P4C7",  nullptr },
+    { "lbl_P4C8",  nullptr },
+    { "lbl_P4C9",  nullptr },
+    { "lbl_P4C10", nullptr },
+  },
+
+  {	// Player 4
+    { "lbl_KittyC1",  nullptr },
+    { "lbl_KittyC2",  nullptr },
+    { "lbl_KittyC3",  nullptr },
+    { "lbl_KittyC4",  nullptr },
+    { "lbl_KittyC5",  nullptr },
+    { "",             nullptr },
+    { "",             nullptr },
+    { "",             nullptr },
+    { "",             nullptr },
+    { "",             nullptr },
+  },
+};
+
+using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
-
-	// Set the cards for all player's hands to null
-	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
-	{
-		for (uint cardIndex = 0; cardIndex < NUM_OF_CARDS_PER_PLAYER; cardIndex++)
-		{
-			playerCards[cardIndex][playerIndex] = nullptr;
-		}
-	}
-
-	/* This threading logic follows the example given at
-	 * https://mayaposch.wordpress.com/2011/11/01/how-to-really-truly-use-qthreads-the-full-explanation/
-	 */
-	//QThread *gameLogicThread = new QThread;
 	logic *gameLogic = new logic(/*this*/);
-	//gameLogic->moveToThread(gameLogicThread);
-
-	// Make Signal connections
-	// Connect the "started" signal to the "PlayGame" slot. This is our main process in gameLogicThread.
-	//connect(gameLogicThread, SIGNAL (started()), gameLogic, SLOT (PlayGame()));
-
-	/* Clean-up connections, for when the PlayGame process ends.
-	 * gameLogic's "PlayGame" signals it's done by emitting "finished" signal. This will:
-	 * 1. Call the game thread's "quit" function.
-	 * 2. Call the game thread's "deleteLater" function, to schedule that object's deletion.
-	 *
-	 * The "finished" signal from the game thread will that thread's "deleteLater" function.
-	 */
-	//connect(gameLogic, SIGNAL(finished()), gameLogicThread, SLOT(quit()));
-
-	//connect(gameLogic, SIGNAL (finished()), gameLogic, SLOT (deleteLater()));
-	//connect(gameLogicThread, SIGNAL (finished()), gameLogicThread, SLOT (deleteLater()));
 
 	// Connect signals/slots for menu bar items
 	connect(ui->actionNewGame, &QAction::triggered, gameLogic, &logic::NewGame);
@@ -61,55 +103,55 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(gameLogic, &logic::CardChanged,					this, &MainWindow::UpdateCardOnTable);
 
 	// Connect GUI events to game logic slots
-	connect(ui->lbl_P1C1,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P1C2,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P1C3,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P1C4,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P1C5,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P1C6,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P1C7,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P1C8,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P1C9,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P1C10,   &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P1C1,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P1C2,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P1C3,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P1C4,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P1C5,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P1C6,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P1C7,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P1C8,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P1C9,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P1C10,   &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
 
-	connect(ui->lbl_P2C1,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P2C2,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P2C3,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P2C4,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P2C5,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P2C6,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P2C7,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P2C8,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P2C9,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P2C10,   &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P2C1,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P2C2,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P2C3,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P2C4,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P2C5,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P2C6,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P2C7,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P2C8,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P2C9,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P2C10,   &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
 
-	connect(ui->lbl_P3C1,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P3C2,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P3C3,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P3C4,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P3C5,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P3C6,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P3C7,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P3C8,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P3C9,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P3C10,   &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);;
+	connect(ui->lbl_P3C1,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P3C2,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P3C3,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P3C4,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P3C5,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P3C6,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P3C7,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P3C8,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P3C9,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P3C10,   &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);;
 
-	connect(ui->lbl_P4C1,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P4C2,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P4C3,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P4C4,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P4C5,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P4C6,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P4C7,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P4C8,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P4C9,    &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_P4C10,   &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_P4C1,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P4C2,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P4C3,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P4C4,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P4C5,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P4C6,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P4C7,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P4C8,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P4C9,    &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_P4C10,   &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
 
-	connect(ui->lbl_KittyC1, &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_KittyC2, &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_KittyC3, &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_KittyC4, &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
-	connect(ui->lbl_KittyC5, &ClickableQLabel::clicked, gameLogic, &logic::CardClicked);
+	connect(ui->lbl_KittyC1, &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_KittyC2, &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_KittyC3, &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_KittyC4, &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
+	connect(ui->lbl_KittyC5, &ClickableQLabel::cardClicked, this, &MainWindow::UpdateCard);
 
 	// Setup the playing table, and start the game
 	gameLogic->SetupTable();
@@ -184,7 +226,7 @@ void MainWindow::SetTeamName(const uint teamId, const QString name)
 
 void MainWindow::SetTeamScore(const uint teamId, const int teamScore)
 {
-	static QLabel* const lblTeamScorePtrs[NUM_OF_TEAMS] =	{
+	QLabel* const lblTeamScorePtrs[NUM_OF_TEAMS] =	{
 	  ui->lbl_Score1, ui->lbl_Score2
 	};
 
@@ -207,7 +249,7 @@ void MainWindow::NewCard(uint playerId, uint cardIndex, Card *card)
 	// Checking the bounds shouldn't be necessary, but we'll be paranoid.
 	if ((playerId < NUM_OF_HANDS) && (cardIndex < NUM_OF_CARDS_PER_PLAYER))
 	{
-		playerCards[playerId][cardIndex] = card;
+		playerCards[playerId][cardIndex].card = card;
 	}
 
 	// Update the card image
@@ -224,12 +266,11 @@ void MainWindow::UpdateCardOnTable(uint player, uint cardIndex)
 	  {	ui->lbl_P4C1, ui->lbl_P4C2, ui->lbl_P4C3, ui->lbl_P4C4, ui->lbl_P4C5, ui->lbl_P4C6, ui->lbl_P4C7, ui->lbl_P4C8, ui->lbl_P4C9, ui->lbl_P4C10 	},	// Player 4
 	  {	ui->lbl_KittyC1, ui->lbl_KittyC2, ui->lbl_KittyC3, ui->lbl_KittyC4, ui->lbl_KittyC5, nullptr, nullptr, nullptr, nullptr, nullptr }	// kitty
 	};
-
 	if ((player < NUM_OF_HANDS) && (cardIndex < NUM_OF_CARDS_PER_PLAYER))
 	{
 		// Get the card we want to update, and it's location on the table
 		QLabel *label = lblCardPtrs[player][cardIndex];
-		Card *card = playerCards[player][cardIndex];
+		Card *card = playerCards[player][cardIndex].card;
 
 		if ((label != nullptr) && (card != nullptr))
 		{	// We have a valid card, and a valid location to update
@@ -248,7 +289,7 @@ void MainWindow::UpdateCardOnTable(uint player, uint cardIndex)
 			// Update the image on the screen
 			label->setPixmap(QPixmap::fromImage(rotatedImage));
 
-			if (card->IsRaised())
+			if (card->IsSelected())
 			{	// Raise the card
 				label->setLineWidth(3);
 				label->setFrameStyle(QFrame::Box /*| QFrame::NoFrame*/ | QFrame::Raised);
@@ -264,3 +305,56 @@ void MainWindow::UpdateCardOnTable(uint player, uint cardIndex)
 	// else, ignore this request
 }
 
+void MainWindow::UpdateCard(QString labelName, Qt::MouseButtons buttons)
+{
+	/* Handle clicking on cards. There are 2 possible actions;
+	 * 1. Left click. This selects and de-selecs a card.
+	 * 2. Right click. This flips the card over.
+	 */
+
+	// Find the lable that generated the mouse event.
+	uint playerId, cardId;
+	FindCardWidget(labelName, &playerId, &cardId);
+	if ((playerId < NUM_OF_HANDS) && (cardId < NUM_OF_CARDS_PER_PLAYER))
+	{	// We found the clicked card
+		Card* playerCard = playerCards[playerId][cardId].card;
+
+		if ((buttons & Qt::LeftButton) != 0)
+		{	// The left button was clicked
+			// Raise/lower the card
+			bool cardIsSelected = playerCard->IsSelected();
+			playerCard->SetSelected(!cardIsSelected);
+		}
+		else if ((buttons & Qt::RightButton) != 0)
+		{	// Right button clicked
+			// Flip the card
+			// Flip it, like normal.
+			playerCard->FlipOrientation();
+		}
+		// else, some other button event that we ignore.
+
+		UpdateCardOnTable(playerId, cardId);
+	}
+	// else, we didn't find the specified card
+}
+
+void MainWindow::FindCardWidget(QString labelName, uint* playerId, uint* cardId)
+{
+	// Initialize return values to invalid values
+	*playerId =  NUM_OF_HANDS;
+	*cardId   =  NUM_OF_CARDS_PER_PLAYER;
+
+	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
+	{
+		for (uint cardIndex = 0; cardIndex < NUM_OF_CARDS_PER_PLAYER; cardIndex++)
+		{
+			if (playerCards[playerIndex][cardIndex].labelName == labelName)
+			{	// We found the specified card
+				*playerId = playerIndex;
+				*cardId = cardIndex;
+				break;	// done searching
+			}
+			// else, this isn't the specified card
+		}	// for each card
+	}	// for each player
+}

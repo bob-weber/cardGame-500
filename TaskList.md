@@ -22,6 +22,7 @@
 - [ ] Save game settings to a file, accessible to various dialogs, like window position.
   - [ ] Then save bidding dialog position, so bidding on different rounds can get the position.
 - [ ] When removing cards from the table, remove the image. Right now, this problem isn't obvious because we redeal.
+- [ ] Find a better way to map label events from the GUI to which object to update.
 
 # Phase 0.5
 - [ ] Add testing for card class

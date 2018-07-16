@@ -1,8 +1,9 @@
 #include "card.h"
 #include "player.h"
 
-Player::Player(QObject *parent) : QObject(parent)
+Player::Player(uint playerId, QObject *parent) : QObject(parent)
 {
+	m_playerId = playerId;
 }
 
 Player::~Player()
@@ -71,6 +72,9 @@ uint Player::AddCardToHand(Card *card)
 		{	// We found an entry to deal the card
 			m_hand[cardIndex] = card;
 			++m_currentNumOfCards;
+
+			card->SetRotation(m_cardRotation);
+			emit SetPlayerCard(m_playerId, cardIndex, card);
 		}
 		else
 		{	// Logic error. Our card pointers and num of cards in the hand are out of sync.

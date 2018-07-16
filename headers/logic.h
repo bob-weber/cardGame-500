@@ -39,7 +39,6 @@ class logic : public QObject
 		void CardSelected(uint playerId, bool cardIsRaised);
 
 	public slots:
-		void CardClicked(uint player, uint card);
 		void NewGame();
 		void BiddingComplete(Bid *bid);
 		void MergingCardsComplete();

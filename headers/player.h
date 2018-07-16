@@ -8,7 +8,7 @@ class Player : public QObject
 {
 		Q_OBJECT
 	public:
-		explicit Player(QObject *parent = nullptr);
+		explicit Player(uint playerId, QObject *parent = nullptr);
 		~Player();
 
 		Q_PROPERTY(uint m_teamId
@@ -105,17 +105,20 @@ class Player : public QObject
 		Card *GetCard(uint cardIndex);
 
 	signals:
+		void SetPlayerCard(uint m_playerId, uint cardIndex, Card* card);
 
 	public slots:
 
 	private:
 
+		uint m_playerId;				// Id of this player
 		uint m_teamId;
 		QString m_playerName;
 		uint m_currentNumOfCards;
 		uint m_maxNumOfCards;
 		uint m_cardRotation;
 		Card **m_hand;					// Array of card ptrs for the cards in the hand
+		uint m_numOfSelectedCards;
 
 		/******************************************************************************************************************
 		 * Find an empty card slot in a player's hand.

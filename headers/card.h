@@ -62,11 +62,11 @@ class Card : public QObject
 		unsigned int GetRotation() const;
 		void SetRotation(unsigned int rotation);
 
-		Q_PROPERTY(bool m_raised
-		           READ IsRaised
-		           WRITE SetRaised)
-		bool IsRaised() const;
-		void SetRaised(bool raise);
+		Q_PROPERTY(bool m_Selected
+		           READ IsSelected
+		           WRITE SetSelected)
+		bool IsSelected() const;
+		void SetSelected(bool raise);
 
 		// Get the card's face image
 		QImage GetFaceImage();
@@ -108,7 +108,7 @@ class Card : public QObject
 		 */
 		Orientation m_orientation;		// Is the card face-up or down.
 		unsigned int m_rotation;
-		bool m_raised;									// Raised up to show it's selected
+		bool m_Selected;									// Raised up to show it's selected
 
 		// Scale images to 1/4 their size. TODO: Make this adjustable based on table size.
 		const float m_imageSizeDivisor = 4.0;
