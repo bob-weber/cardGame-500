@@ -1,19 +1,32 @@
 #include <QObject>
-#include "game_settings.h"
+#include <QMessageBox>
+
+#include "game_500_settings.h"
+#include "card.h"
+#include "player.h"
+#include "mergeDialog.h"
 
 #include "mergecards.h"
 
 MergeCards::MergeCards(QObject *parent)
 {
+	Q_UNUSED(parent);
 }
 
-void MergeCards::MergeHands(Player *player, Player *kitty)
+void MergeCards::StartMerge(Player* player, Player* kitty)
 {
 	m_player = player;
 	m_kitty = kitty;
-	m_kittySelectedCardsCount = 0;
-	m_playerSelectedCardsCount = 0;
 
+	// Turn face-up every card in the players hand and kitty
+	for (uint cardIndex = 0; cardIndex < NUM_OF_CARDS_PER_PLAYER; cardIndex++)
+	{
+		m_player->SetCardOrientation(cardIndex, Card::FACE_UP);
+	}
+	for (uint cardIndex = 0; cardIndex < NUM_OF_CARDS_IN_KITTY; cardIndex++)
+	{
+		m_kitty->SetCardOrientation(cardIndex, Card::FACE_UP);
+	}
 
 	/* Pop up a dialog that explains how to merge the hand with the kitty.
 	 * It contains an Ok and Reset button.
@@ -24,17 +37,82 @@ void MergeCards::MergeHands(Player *player, Player *kitty)
 	 * When Ok is selected (and it's enabled), the selected cards in the kitty are exchanged with those selected in the
 	 * player's hand.
 	 */
-	// Pop up a dialog to enable the user to exchange cards when the appropriate cards have been completed.
-	m_mergeMsgBox = new QMessageBox;;
-	QString msg = QString("%1, Select the cards in your hand, and in the kitty, that you want to exchange.\n\rThe number of cards selected must be the same.")
-	                      .arg(m_player->GetPlayerName());
-	QString informativeMsg = QString("When done, press \"Ok\". To reset and start over, hit \"Reset\".");
-	m_mergeMsgBox->setText(msg);
-	m_mergeMsgBox->setInformativeText(informativeMsg);
-	m_mergeMsgBox->setStandardButtons(QMessageBox::Ok | QMessageBox::Reset);
-	m_mergeMsgBox->setDefaultButton(QMessageBox::Ok);
-	m_mergeMsgBox->setModal(false);
-	m_mergeMsgBox->show();
+
+	// Dialog to merge cards
+	// Make it non-modal so the user can interface with the tabletop
+	MergeDialog *mergeDialog = new MergeDialog(m_player->GetNumOfSelectedCards(), m_kitty->GetNumOfSelectedCards());
+	mergeDialog->setModal(false);
+
+	// connect this object's signals
+	//connect(this, &MergeCards::UpdateCardSelection,  mergeDialog, &MergeDialog::ControlOkButton);
+	connect(this, &MergeCards::CheckSelectedNumOfCards, mergeDialog, &MergeDialog::CheckSelectedNumOfCards);
+	connect(mergeDialog, &MergeDialog::ClearSelectedCards, this, &MergeCards::ResetMerging);
+	connect(mergeDialog, &MergeDialog::CardSelectionComplete, this, &MergeCards::CompleteMerge);
+
+	// When the dialog completes, it'll call BiddingIsComplete();
+	mergeDialog->show();
+	mergeDialog->raise();
+	mergeDialog->activateWindow();
+}
+
+
+void MergeCards::CompleteMerge()
+{
+	if (m_player->GetNumOfSelectedCards() == m_kitty->GetNumOfSelectedCards())
+	{
+		// Exchange the selected cards
+		uint kittyCardId = 0;
+		for (uint playerCardId = 0; playerCardId < NUM_OF_CARDS_PER_PLAYER; playerCardId++)
+		{
+			Card* playerCard = m_player->GetCard(playerCardId);
+			if (playerCard != nullptr)
+			{
+				if (playerCard->IsSelected())
+				{	// This card is selected
+					// Find the next card selected in the kitty
+					// Advance the kitty card index until it finds a valid, selected card
+					Card* kittyCard = m_kitty->GetCard(kittyCardId);
+					bool isSelected = kittyCard->IsSelected();
+					while (!isSelected && (kittyCardId < NUM_OF_CARDS_IN_KITTY))
+					{
+						++kittyCardId;
+						kittyCard = m_kitty->GetCard(kittyCardId);
+						isSelected = kittyCard->IsSelected();
+					}
+
+					if (kittyCardId < NUM_OF_CARDS_IN_KITTY)
+					{	// This is a selected card
+						// Exchange cards
+						m_player->SwapCards(playerCardId, m_kitty, kittyCardId);
+						++kittyCardId;		// advance past this exchanged card
+					}
+					else
+					{	// We didn't find a matching selected card in the kitty
+						// This happens if the number of selected cards doesn't match
+						// We should never get here
+						cout << "Logic error, MergeCards. Didn't find matching selected card in kitty." << endl;
+					}
+				}
+				// else, not a selected card. Ignore.
+			}
+			// else, no card at this location
+		}
+
+		ResetMerging();
+		emit MergingComplete();
+	}
+}
+
+void MergeCards::ResetMerging()
+{
+	m_player->DeselectAllCards();
+	m_kitty->DeselectAllCards();
+	emit CheckSelectedNumOfCards(m_player->GetNumOfSelectedCards(), m_kitty->GetNumOfSelectedCards());
+}
+
+void MergeCards::UpdateCardSelection()
+{
+	emit CheckSelectedNumOfCards(m_player->GetNumOfSelectedCards(), m_kitty->GetNumOfSelectedCards());
 }
 
 

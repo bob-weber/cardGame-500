@@ -6,7 +6,7 @@
 #include <QString>
 #include "bid.h"
 #include "player.h"
-#include "game_settings.h"
+#include "game_500_settings.h"
 
 /**********************************************************************************************************************
  * This class encapsulates the bidding actions.

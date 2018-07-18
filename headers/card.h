@@ -52,16 +52,6 @@ class Card : public QObject
 		QImage GetBackImage() const;
 		void SetBackImage();
 
-		// Rotation varies from 0 to 359 (degrees)
-		const unsigned int MIN_ROTATION = 0;
-		const unsigned int MAX_ROTATION = 359;
-		Q_PROPERTY(unsigned int rotation
-		           READ GetRotation
-		           WRITE SetRotation
-		           NOTIFY RotationChanged)
-		unsigned int GetRotation() const;
-		void SetRotation(unsigned int rotation);
-
 		Q_PROPERTY(bool m_Selected
 		           READ IsSelected
 		           WRITE SetSelected)
@@ -75,7 +65,7 @@ class Card : public QObject
 		 * If no suit or PIP is specified, a 2 of spades will be created.
 		 */
 		explicit Card(Pip pip = PIP_2, Suit suit = SUIT_SPADE,
-		              Orientation orientation = FACE_DOWN, unsigned int rotation = 0);
+		              Orientation orientation = FACE_DOWN);
 		virtual ~Card();
 
 		// Convencience operators
@@ -92,8 +82,7 @@ class Card : public QObject
 		string Print();
 
 	signals:
-		void OrientationChanged(Card::Orientation orientation);
-		void RotationChanged(unsigned int);
+		void OrientationChanged(Orientation orientation);
 
 	public slots:
 
@@ -107,7 +96,6 @@ class Card : public QObject
 		 * as whether the card is face up/down, or rotated.
 		 */
 		Orientation m_orientation;		// Is the card face-up or down.
-		unsigned int m_rotation;
 		bool m_Selected;									// Raised up to show it's selected
 
 		// Scale images to 1/4 their size. TODO: Make this adjustable based on table size.

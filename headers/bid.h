@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QString>
 
-#include "game_settings.h"
+#include "game_500_settings.h"
 
 class Bid : public QObject
 {

@@ -1,16 +1,22 @@
 #include "card.h"
 #include "player.h"
 
-Player::Player(uint playerId, QObject *parent) : QObject(parent)
+Player::Player(QObject *parent) : QObject(parent)
 {
-	m_playerId = playerId;
 }
 
 Player::~Player()
 {
-	// delete card pointers
-	delete[] m_hand;
+}
 
+uint Player::GetPlayerId() const
+{
+	return this->m_playerId;
+}
+
+void Player::SetPlayerId(uint Id)
+{
+	this->m_playerId = Id;
 }
 
 uint Player::GetTeamId() const {
@@ -49,8 +55,9 @@ uint Player::GetCurrentNumOfCards() const {
 	return this->m_currentNumOfCards;
 }
 
-void Player::SetCurrentNumOfCards(uint numOfCards) {
-	this->m_currentNumOfCards = numOfCards;
+void Player::SetCurrentNumOfCards(uint numOfCards)
+{
+	m_currentNumOfCards = numOfCards;
 }
 
 uint Player::GetCardRotation() const {
@@ -59,9 +66,35 @@ uint Player::GetCardRotation() const {
 
 void Player::SetCardRotation(uint rotation) {
 	this->m_cardRotation = rotation;
+	// Notify the GUI that all cards orientation has changed
+	for (uint cardIndex = 0; cardIndex < m_maxNumOfCards; cardIndex++)
+	{
+		emit CardChanged(m_playerId, cardIndex);
+	}
 }
 
-uint Player::AddCardToHand(Card *card)
+uint Player::GetNumOfSelectedCards() const
+{
+	return this->m_numOfSelectedCards;;
+}
+
+void Player::SetNumOfSelectedCards(uint numOfSelectedCards)
+{
+	m_numOfSelectedCards = numOfSelectedCards;
+}
+
+void Player::SetCardOrientation(uint cardId, Card::Orientation orientation)
+{
+	Card *card = GetCard(cardId);
+	if (card != nullptr)
+	{
+		card->SetOrientation(orientation);
+		emit CardChanged(m_playerId, cardId);
+	}
+	// else, invalid card
+}
+
+uint Player::AddCard(Card *card)
 {
 	uint cardIndex = m_maxNumOfCards;	// This is an invalid index value. We'll set it to a valid one if successful.
 
@@ -73,8 +106,7 @@ uint Player::AddCardToHand(Card *card)
 			m_hand[cardIndex] = card;
 			++m_currentNumOfCards;
 
-			card->SetRotation(m_cardRotation);
-			emit SetPlayerCard(m_playerId, cardIndex, card);
+			emit CardChanged(m_playerId, cardIndex);
 		}
 		else
 		{	// Logic error. Our card pointers and num of cards in the hand are out of sync.
@@ -90,41 +122,74 @@ uint Player::AddCardToHand(Card *card)
 	return cardIndex;
 }
 
-void Player::RemoveCardFromHand(unsigned int cardIndex)
-{
-	if (m_hand[cardIndex] != nullptr)
-	{	// This card slot is not empty
-		m_hand[cardIndex]->SetOrientation(Card::FACE_DOWN);	// Flip all cards face down
-		m_hand[cardIndex] = nullptr;		// Empty this place in the hand
-		if (m_currentNumOfCards > 0)
-		{	// Update # of cards in hand
-			--m_currentNumOfCards;
-		}
-		else
-		{
-			throw logic_error("RemoveCardFromHand: m_numOfCardsInHand is 0, but we found a card in the hand.");
-		}
-	}
-	// else, this slot is already empty
-	// This is normal. We don't make sure the slot has a card before trying to remove it.
-}
-
-void Player::RemoveAllCardsFromHand()
+void Player::RemoveAllCards()
 {
 	for (unsigned int cardIndex = 0; cardIndex < m_maxNumOfCards; ++cardIndex)
 	{
-		RemoveCardFromHand(cardIndex);
-	}
-	if (m_currentNumOfCards != 0)
-	{	// This is an error. Counter should be maintained as we add or remove cards
-		throw logic_error("RemoveAllCardsFromHand: m_numOfCardsInHand is not 0.");
+		if (m_hand[cardIndex] != nullptr)
+		{	// This is a valid card
+			m_hand[cardIndex]->SetOrientation(Card::FACE_DOWN);	// Flip all cards face down
+			m_hand[cardIndex]->SetSelected(false);
+
+			// Update the card image before deleting the card, so we have an image on the table.
+			// TODO: Update image on table with a transparent card image when there is no card.
+			emit CardChanged(m_playerId, cardIndex);
+
+			m_hand[cardIndex] = nullptr;
+			if (m_currentNumOfCards > 0) {
+				--m_currentNumOfCards;
+			}
+		}
 	}
 }
 
+void Player::ToggleCardSelection(Card* card)
+{
+	bool selected = false;
+	if (card != nullptr)
+	{
+		selected = !card->IsSelected();
+		card->SetSelected(selected);
+	}
+	// Update the card seletion count
+	if (selected) {
+		++m_numOfSelectedCards;
+	}
+	else {
+		--m_numOfSelectedCards;
+	}
+}
+
+void Player::DeselectAllCards()
+{
+	for (unsigned int cardIndex = 0; cardIndex < m_maxNumOfCards; ++cardIndex)
+	{
+		if (m_hand[cardIndex] != nullptr)
+		{	// This is a valid card
+			m_hand[cardIndex]->SetSelected(false);
+			emit CardChanged(m_playerId, cardIndex);
+		}
+	}
+	m_numOfSelectedCards = 0;
+}
+
+void Player::SwapCards(uint cardId, Player* player2, uint player2cardId)
+{
+	Card* tempCard = GetCard(cardId);
+	SetCard(cardId, player2->GetCard(player2cardId));
+	player2->SetCard(player2cardId, tempCard);
+	emit CardChanged(m_playerId, cardId);
+	emit CardChanged(player2->GetPlayerId(), player2cardId);
+}
 
 Card *Player::GetCard(uint cardIndex)
 {
 	return m_hand[cardIndex];
+}
+
+void Player::SetCard(uint cardIndex, Card *card)
+{
+	m_hand[cardIndex] = card;
 }
 
 unsigned int Player::FindEmptyHandSlot()

@@ -13,23 +13,20 @@ class MergeCards : public QObject
 
 	public:
 		explicit MergeCards(QObject *parent = nullptr);
+		void StartMerge(Player* player, Player* kitty);
 
 	public slots:
-		void MergeHands(Player* player, Player* kitty);
+		void UpdateCardSelection();
+		void CompleteMerge();
+		void ResetMerging();
 
 	signals:
+		void CheckSelectedNumOfCards(uint numOfPlayerCardsSelected, uint numOfKittyCardsSelected);
 		void MergingComplete();
-
-	public slots:
-		//void CardSelectionChanged(uint playerId, bool cardIsRaised);
 
 	private:
 		Player *m_player;
 		Player *m_kitty;
-
-		// Keep a count of the number of selected cards in the player's hand and the kitty.
-		uint m_kittySelectedCardsCount;
-		uint m_playerSelectedCardsCount;
 
 		// Pointer to msg box, so other functions
 		QMessageBox* m_mergeMsgBox;

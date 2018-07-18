@@ -6,7 +6,7 @@
 
 #include "player.h"
 #include "deck.h"
-#include "game_settings.h"
+#include "game_500_settings.h"
 #include "score.h"
 
 class logic : public QObject
@@ -21,7 +21,7 @@ class logic : public QObject
 		void SetDealer(uint);
 		QString *GetPlayerName(uint playerIndex);
 
-		explicit logic(QObject *parent = nullptr);
+		explicit logic(Player **players, Deck *deck, QObject *parent = nullptr);
 		~logic();
 
 		//void AdvanceGame();
@@ -33,35 +33,19 @@ class logic : public QObject
 		void PlayerActionChanged(uint player, QString action);
 		void TeamNameChanged(uint teamId, QString name);
 		void TeamScoreChanged(uint teamId, int teamScore);
-		void SetPlayerCard(uint playerId, uint cardIndex, Card* card);
-		void CardChanged(uint playerId, uint cardIndex);
+		void SetPlayerCard(uint playerId, uint cardIndex, Card* card, Player* player);
 		void GetPlayerBids(uint dealer, Player **playersInfo);
-		void CardSelected(uint playerId, bool cardIsRaised);
+		void CardSelectionChanged();
 
 	public slots:
 		void NewGame();
 		void BiddingComplete(Bid *bid);
-		void MergingCardsComplete();
-		//void UpdateCardOnTable(uint player, uint card, Card::Orientation orientation, uint rotation, bool raised);
+		void MergeComplete();
+		void UpdateCardSelection(uint playerId, uint CardId);
+		void UpdateCardOrientation(uint playerId, uint CardId);
+		//void UpdateCard_merge(uint playerId, uint CardId);
 
 	protected:
-		typedef struct {
-			QString name;
-			uint cardRotation;
-			uint teamID;	// 0=no team. >0 with the same id groups players on a team.
-		} playerT;
-		playerT m_PlayerInfo[NUM_OF_HANDS] =
-		{
-		  // ID 0-3 are the regular players
-		  // ID 4 is the kitty
-		  // ID         Card Rotation  Team ID
-		  // ---------  -------------  -------
-		  { "Kathy",               0,       1 },
-		  { "Theodore",           90,       2 },
-		  { "Priya",             180,       1 },
-		  { "Edward",            270,       2 },
-		  { "",                    0,       0 }
-		};
 
 	private:
 
@@ -97,7 +81,6 @@ class logic : public QObject
 		 * Notes:
 		 ******************************************************************************************************************/
 		void AddCardToPlayer(uint playerId, Card * card);
-		void ReturnAllCards();
 
 		/******************************************************************************************************************
 		 * Merge the kitty with the hand of the specified player. The user selects the cards from the kitty that the
@@ -138,8 +121,8 @@ class logic : public QObject
 		GameStateT m_gameState;
 		//bool m_WaitingForStateComplete;
 
-		Deck *deck;					// The deck we're playing with
-		Player **m_player;	// Array of players
+		Player **m_players;
+		Deck* m_deck;
 
 		// Keep track of which player is currently active (bidding, playing, etc.)
 		//uint m_activePlayer;

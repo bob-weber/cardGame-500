@@ -9,12 +9,11 @@ using namespace std;
 // There's only one image used for all cards
 QImage Card::m_backImage;
 
-Card::Card(Card::Pip pip, Card::Suit suit, Card::Orientation orientation, unsigned int rotation)
+Card::Card(Card::Pip pip, Card::Suit suit, Card::Orientation orientation)
 {
 	this->m_suit = suit;
 	this->m_pip = pip;
 	this->m_orientation = orientation;
-	this->m_rotation = rotation;
 
 	// Set this card's face image
 	//cout << "Card " << Print() << ", imagePath=" << GetCardImagePath(pip, suit) << endl;
@@ -68,23 +67,6 @@ void Card::SetBackImage()
 	QImage image = QImage(m_cardBackImagePath);
 	QSize imageSize = image.size() / m_imageSizeDivisor;
 	m_backImage = image.scaled(imageSize);
-}
-
-unsigned int Card::GetRotation() const {
-	return this->m_rotation;
-}
-
-/* Only change rotation if it's valid, and different than the current rotation.
- * Requiring the rotation to be different means we only send a notification when the rotation has really changed.
- */
-void Card::SetRotation(unsigned int rotation) {
-	if ((rotation >= MIN_ROTATION) &&
-	    (rotation <= MAX_ROTATION) &&
-	    (rotation != this->m_rotation))
-	{
-		this->m_rotation = rotation;
-		emit RotationChanged(rotation);
-	}
 }
 
 bool Card::IsSelected() const

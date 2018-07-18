@@ -1,5 +1,5 @@
 #include <QWidget>
-#include "game_settings.h"
+#include "game_500_settings.h"
 
 #include "bid.h"
 

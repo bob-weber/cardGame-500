@@ -14,6 +14,4 @@
  */
 #define KITTY_INDEX								4
 
-
-
 #endif // GAME500_SETTINGS_H

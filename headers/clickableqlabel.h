@@ -12,7 +12,7 @@ class ClickableQLabel : public QLabel
 		Q_OBJECT
 
 	public:
-		explicit ClickableQLabel(QWidget* parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags());
+		explicit ClickableQLabel(QWidget* parent = Q_NULLPTR);
 		~ClickableQLabel();
 
 	signals:

@@ -1,9 +1,9 @@
 #include <QMouseEvent>
 
-#include "game_settings.h"
+#include "game_500_settings.h"
 #include "clickableqlabel.h"
 
-ClickableQLabel::ClickableQLabel(QWidget* parent, Qt::WindowFlags f)
+ClickableQLabel::ClickableQLabel(QWidget* parent)
     : QLabel(parent) {
 }
 

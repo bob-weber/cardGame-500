@@ -2,7 +2,7 @@
 #include <QString>
 
 #include "utilities.h"
-#include "game_settings.h"
+#include "game_500_settings.h"
 #include "user_bid_dialog.h"
 #include "score.h"
 #include "player.h"

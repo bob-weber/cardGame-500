@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include "game_settings.h"
+#include "game_500_settings.h"
 #include "bid.h"
 /**********************************************************************************************************************
  * This class manages the bidding score and team scores.

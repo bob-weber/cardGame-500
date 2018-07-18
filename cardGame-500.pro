@@ -39,7 +39,8 @@ SOURCES += \
     sources/bid.cpp \
     sources/mergecards.cpp \
     sources/score.cpp \
-    sources/bidding.cpp
+    sources/bidding.cpp \
+    sources/mergeDialog.cpp
 
 HEADERS += \
     headers/card.h \
@@ -49,16 +50,18 @@ HEADERS += \
     headers/player.h \
     headers/user_bid_dialog.h \
     headers/logic.h \
-    headers/game_settings.h \
     headers/utilities.h \
     headers/bid.h \
     headers/mergecards.h \
     headers/bidding.h \
-    headers/score.h
+    headers/score.h \
+    headers/game_500_settings.h \
+    headers/mergeDialog.h
 
 FORMS += \
     mainwindow.ui \
-    user_bid_dialog.ui
+    user_bid_dialog.ui \
+    mergeDialog.ui
 
 RESOURCES += \
     cardgame.qrc

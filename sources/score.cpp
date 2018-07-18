@@ -1,5 +1,5 @@
 #include <QObject>
-#include "../headers/game_settings.h"
+#include "../headers/game_500_settings.h"
 #include "../headers/bid.h"
 
 #include "../headers/score.h"

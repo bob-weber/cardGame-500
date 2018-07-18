@@ -2,75 +2,29 @@
 
 #include "deck.h"
 #include "player.h"
-#include "game_settings.h"
+#include "game_500_settings.h"
 #include "utilities.h"
 #include "bidding.h"
 #include "score.h"
 #include "mergecards.h"
+#include "mainwindow.h"
 
 #include "logic.h"
 
 using namespace std;
 
 
-logic::logic(QObject *parent) : QObject(parent)
+logic::logic(Player **players, Deck *deck, QObject *parent) : QObject(parent)
 {
-	/* Allocate player instances in the constructor
-	 * Since we delete them in the destructor, it's more logical to allocate them here, rather than rely on
-	 * another function being called after the constructor.
-	 */
-	m_player = new Player *[NUM_OF_HANDS];
-	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
-	{
-		m_player[playerIndex] = new Player(playerIndex);
-		connect(m_player[playerIndex], &Player::SetPlayerCard, this, &logic::SetPlayerCard);
-	}
-
-	/* Do not do other initialization here that relies on signals and slots.
-	 * The parent sets up these connections. We'll do this in SetupTable(), which the parent will call.
-	 */
+	m_players = players;
+	m_deck = deck;
+	Q_UNUSED(parent);
 }
 
 void logic::SetupTable()
 {
-	/********************************************************************************************************************
-	 * Setup the deck, players, etc.
-	 ********************************************************************************************************************/
-	// Create a deck
-	deck = new Deck(Deck::DECK_4S_AND_UP, 1, 1);
-	//deck->Print();
-
-	// Initialize the players
-	for (uint playerIndex = 0; playerIndex < NUM_OF_PLAYERS; playerIndex++)
-	{
-		// Set each player's ID
-		Player *player = m_player[playerIndex];
-		player->SetPlayerName(m_PlayerInfo[playerIndex].name);
-		player->SetTeamId(m_PlayerInfo[playerIndex].teamID);
-
-		// All players start of with no cards
-		player->SetCurrentNumOfCards(0);
-		player->SetMaxNumOfCards(NUM_OF_CARDS_PER_PLAYER);
-		// Set the card's rotation on the GUI
-		player->SetCardRotation(m_PlayerInfo[playerIndex].cardRotation);
-
-		emit PlayerNameChanged(playerIndex, player->GetPlayerName());
-		emit PlayerActionChanged(playerIndex, "");
-	}	// for each player
-
-	// Initialize the kitty
-	Player *kitty = m_player[KITTY_INDEX];
-	kitty->SetPlayerName(m_PlayerInfo[KITTY_INDEX].name);
-	kitty->SetCurrentNumOfCards(0);
-	kitty->SetMaxNumOfCards(NUM_OF_CARDS_IN_KITTY);
-	kitty->SetCardRotation(m_PlayerInfo[KITTY_INDEX].cardRotation);
 
 	// Initialize Score
-	QString teamName = QString("%1/%2").arg(m_player[0]->GetPlayerName()).arg(m_player[2]->GetPlayerName());
-	emit TeamNameChanged(0, teamName);
-	teamName = QString("%1/%2").arg(m_player[1]->GetPlayerName()).arg(m_player[3]->GetPlayerName());
-	emit TeamNameChanged(1, teamName);
-
 	m_gameScore = new Score();
 	m_gameScore->ClearTeamScores();
 	emit TeamScoreChanged(0, m_gameScore->GetTeamScore(0));
@@ -83,18 +37,12 @@ void logic::SetupTable()
 	// Game is idle until the player takes some action
 	m_gameState = GAME_IDLE;
 	//m_WaitingForStateComplete = false;
-
 }
 
 
 logic::~logic()
 {
-	// Delete players
-	for (uint i = 0; i < NUM_OF_HANDS; i++)
-	{
-		delete m_player[i];
-	}
-	delete[] m_player;
+
 }
 
 
@@ -106,16 +54,15 @@ void logic::SetDealer(uint dealer) {
 	this->m_dealer = dealer;
 }
 
-QString *logic::GetPlayerName(uint playerIndex) {
-	return &m_PlayerInfo[playerIndex].name;
-}
-
 void logic::NewGame()
 {
 	m_gameState = GAME_NEW_GAME;
 	// The deal starts with player 0
 	m_dealer = 0;
 	m_gameScore->ClearTeamScores();
+	emit TeamScoreChanged(0, m_gameScore->GetTeamScore(0));
+	emit TeamScoreChanged(1, m_gameScore->GetTeamScore(1));
+
 	NewHand();
 }
 
@@ -124,8 +71,13 @@ void logic::NewHand()
 	m_gameState = GAME_NEW_HAND;
 	// Return all cards, shuffle the deck, and deal
 	// All of these are non-blocking.
-	ReturnAllCards();
-	deck->Shuffle();
+	// Return all cards from the players and the kitty
+	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
+	{
+		m_players[playerIndex]->RemoveAllCards();
+	}
+
+	m_deck->Shuffle();
 	DealCards();
 	GetBids();
 }
@@ -138,7 +90,7 @@ void logic::GetBids()
 	Bidding *bidding = new Bidding();
 	connect(bidding, &Bidding::PlayerActionChanged, this, &logic::PlayerActionChanged);
 	connect(bidding, &Bidding::BiddingIsComplete, this, &logic::BiddingComplete);
-	bidding->GetAllBids(m_dealer, m_player);
+	bidding->GetAllBids(m_dealer, m_players);
 	// When done, "bidding" will emit BiddingComplete().
 }
 
@@ -173,34 +125,38 @@ void logic::MergeKittyWithHand()
 	 * and exit, returning control to this function.
 	 */
 
-	// Turn all the cards in the player's hand, and the kitty, face-up
-//	TurnPlayersCards(m_currentBid->GetPlayerId(), Card::FACE_UP);
-//	TurnPlayersCards(KITTY_INDEX, Card::FACE_UP);
-
 	// Create the merge task, with the two players who's cards we'll merge.
 	MergeCards *mergeCards = new MergeCards();
-//	mergeCards->MergeHandsd(m_player[m_currentBid->GetPlayerId()], m_player[KITTY_INDEX]);
-//	connect(this, &logic::CardSelected, mergeCards, &MergeCards::CardSelectionChanged);
-//	connect(mergeCards, &MergeCards::CardChanged, this, &logic::UpdateCardOnTable);
 
-//	        UpdateCardOnTable(uint player, uint card, Card::Orientation orientation, uint rotation, bool isSelected);
+	// Pass the card selection siganl to mergeCards, so it knows to check how many cards are selected.
+	connect(this, &logic::CardSelectionChanged, mergeCards, &MergeCards::UpdateCardSelection);
 
+	connect(mergeCards, &MergeCards::MergingComplete, this, &logic::MergeComplete);
+
+	// Start the merge
+	mergeCards->StartMerge(m_players[m_currentBid->GetPlayerId()], m_players[KITTY_INDEX]);
 }
 
-void logic::MergingCardsComplete()
+void logic::MergeComplete()
 {
-	// Todo: Play hand
+	m_gameState = GAME_PLAY_HAND;
+
 }
 
-
-void logic::ReturnAllCards()
+void logic::UpdateCardSelection(uint playerId, uint cardId)
 {
-	// Return all cards from the players and the kitty
-	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
-	{
-		m_player[playerIndex]->RemoveAllCardsFromHand();
-	}
+	Q_UNUSED(playerId);
+	Q_UNUSED(cardId);
+	// Re-emit for subtasks
+	emit CardSelectionChanged();
 }
+
+void logic::UpdateCardOrientation(uint playerId, uint cardId)
+{
+	Q_UNUSED(playerId);
+	Q_UNUSED(cardId);
+}
+
 
 void logic::DealCards()
 {
@@ -209,9 +165,9 @@ void logic::DealCards()
 	uint playerIndex = m_dealer;
 	bool dealToKittyThisPass = false;
 	uint cardIndex = 0;
-	while (cardIndex < deck->GetTotalCardCount())
+	while (cardIndex < m_deck->GetTotalCardCount())
 	{
-		m_player[playerIndex]->AddCardToHand(deck->GetNextCard());
+		m_players[playerIndex]->AddCard(m_deck->GetNextCard());
 		++cardIndex;
 
 		// Advance to the next player
