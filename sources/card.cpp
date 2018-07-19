@@ -22,6 +22,12 @@ Card::Card(Card::Pip pip, Card::Suit suit, Card::Orientation orientation)
 	QSize imageSize = image.size() / m_imageSizeDivisor;
 	this->m_faceImage = image.scaled(imageSize);
 	this->m_Selected = false;		// Start of not raised up
+
+	/* Sorting value is ordered with spades as the lowest, then clubs, diamonds, and hearts.
+	 * Jokers are the highest.
+	 * Aces are sorted above Kings, not as 1s.
+	 */
+	this->m_sortValue = (uint)pip + ((uint)suit * (uint)PIP_NUMBER_OF_PIPS);
 }
 
 Card::~Card()
@@ -77,6 +83,11 @@ bool Card::IsSelected() const
 void Card::SetSelected(bool raise)
 {
 	this->m_Selected = raise;
+}
+
+uint Card::GetSortValue() const
+{
+	return this->m_sortValue;
 }
 
 QImage Card::GetFaceImage()

@@ -1,3 +1,4 @@
+#include "game_500_settings.h"
 #include "card.h"
 #include "player.h"
 
@@ -178,8 +179,47 @@ void Player::SwapCards(uint cardId, Player* player2, uint player2cardId)
 	Card* tempCard = GetCard(cardId);
 	SetCard(cardId, player2->GetCard(player2cardId));
 	player2->SetCard(player2cardId, tempCard);
-	emit CardChanged(m_playerId, cardId);
-	emit CardChanged(player2->GetPlayerId(), player2cardId);
+}
+
+void Player::SortHand()
+{
+	PrintHand();
+	for (uint i = 0; i < m_maxNumOfCards-1; i++)
+	{
+		for (uint j = i+1; j < m_maxNumOfCards; j++)
+		{
+			Card* card1 = m_hand[i];
+			Card* card2 = m_hand[j];
+			if ((card1 != nullptr) && (card2 != nullptr))
+			{
+				if (card1->GetSortValue() > card2->GetSortValue())
+				{	// Swap these 2 cards
+					SwapCards(i, this, j);
+				}
+				// else, cards are in correct order. Don't swap.
+			}
+		}
+	}
+	PrintHand();
+}
+
+void Player::RefreshHand()
+{
+	for (uint cardId = 0; cardId < m_maxNumOfCards; cardId++)
+	{
+		emit CardChanged(m_playerId, cardId);
+	}
+}
+
+void Player::PrintHand()
+{
+	cout << m_playerName.toStdString() << ": ";
+	for (uint cardId = 0; cardId < m_maxNumOfCards; cardId++)
+	{
+		Card* card = m_hand[cardId];
+		cout << card->Print() << ", ";
+	}
+	cout << endl;
 }
 
 Card *Player::GetCard(uint cardIndex)

@@ -10,7 +10,7 @@
   * Complete. Bids are verified to be valid, including double nellow, which requires partner bid nellow.
   * Bids are displayed on the table as they're made.
   * Invalid bids result in player being able to rebid.
-- [ ] Add card play to merge winning bid with kitty.
+- [x] Add card play to merge winning bid with kitty.
 - [ ] Test card play for validity/prevent illegal moves
 - [ ] Add scoring
 - [ ] Pop-up after each hand, indicating:
@@ -23,6 +23,7 @@
   - [ ] Then save bidding dialog position, so bidding on different rounds can get the position.
 - [ ] When removing cards from the table, remove the image. Right now, this problem isn't obvious because we redeal.
 - [ ] Find a better way to map label events from the GUI to which object to update.
+- [x] Sort cards in hands by suit, allowing for a trump suit.
 
 # Phase 0.5
 - [ ] Add testing for card class

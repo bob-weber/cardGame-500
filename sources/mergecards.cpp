@@ -98,6 +98,12 @@ void MergeCards::CompleteMerge()
 			// else, no card at this location
 		}
 
+		// Sort the affected hands
+		m_player->SortHand();
+		m_player->RefreshHand();
+		m_kitty->SortHand();
+		m_kitty->RefreshHand();
+
 		ResetMerging();
 		emit MergingComplete();
 	}

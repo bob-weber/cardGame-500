@@ -58,6 +58,10 @@ class Card : public QObject
 		bool IsSelected() const;
 		void SetSelected(bool raise);
 
+		Q_PROPERTY(uint m_sortValue
+		           READ GetSortValue)
+		uint GetSortValue() const;
+
 		// Get the card's face image
 		QImage GetFaceImage();
 
@@ -96,7 +100,8 @@ class Card : public QObject
 		 * as whether the card is face up/down, or rotated.
 		 */
 		Orientation m_orientation;		// Is the card face-up or down.
-		bool m_Selected;									// Raised up to show it's selected
+		bool m_Selected;							// Raised up to show it's selected
+		uint m_sortValue;							// For sorting the cards in a player's hand
 
 		// Scale images to 1/4 their size. TODO: Make this adjustable based on table size.
 		const float m_imageSizeDivisor = 4.0;

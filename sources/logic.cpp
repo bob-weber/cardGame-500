@@ -79,6 +79,11 @@ void logic::NewHand()
 
 	m_deck->Shuffle();
 	DealCards();
+	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
+	{
+		m_players[playerIndex]->SortHand();
+		m_players[playerIndex]->RefreshHand();
+	}
 	GetBids();
 }
 
