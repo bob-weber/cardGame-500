@@ -1,6 +1,6 @@
 #include <type_traits>
 #include <QLabel>
-#include <QSignalMapper>
+#include <QMessageBox>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -384,4 +384,26 @@ void MainWindow::FindCardWidget(QString labelName, uint* playerId, uint* cardId)
 			// else, this isn't the specified card
 		}	// for each card
 	}	// for each player
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+	QMessageBox helpMsg;
+	helpMsg.setWindowTitle("About Cards 500");
+
+	/* Put all the text in the box with setText.
+	 * The length of the message specified by setText is what determines the width of the message box.
+	 * If you use setInformativeText, that text may wrap.
+	 * See http://apocalyptech.com/linux/qt/qmessagebox/
+	 */
+	QString versionMsg   = QString("Version %1.%2.%3").arg(MAJOR_VERSION).arg(MINOR_VERSION).arg(BUILD_NUMBER);
+	QString dateMsg      = "Build date: " + QString(__DATE__);
+	QString timeMsg      = "Build time: " + QString(__TIME__);
+	QString developerMsg = QString("Devloper: Bob Weber\nemail: bob@theWeberVenture.com\nWebsite: https://theWeberVenture.com");
+	QString aboutMsg = versionMsg + "\n" + dateMsg + "\n" + timeMsg + "\n\n" + developerMsg;
+	helpMsg.setText(aboutMsg);
+
+	helpMsg.setStandardButtons(QMessageBox::Ok);
+	helpMsg.setDefaultButton(QMessageBox::Ok);
+	helpMsg.exec();
 }

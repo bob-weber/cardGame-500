@@ -37,6 +37,9 @@ class MainWindow : public QMainWindow
 		void CardSelectionChanged(uint playerId, uint cardId);
 		void CardOrientationChanged(uint playerId, uint cardId);
 
+	private slots:
+		void on_actionAbout_triggered();
+
 	private:
 		Ui::MainWindow *ui;
 

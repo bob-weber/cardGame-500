@@ -24,6 +24,7 @@
 - [ ] When removing cards from the table, remove the image. Right now, this problem isn't obvious because we redeal.
 - [ ] Find a better way to map label events from the GUI to which object to update.
 - [x] Sort cards in hands by suit, allowing for a trump suit.
+- [x] Add version information
 
 # Phase 0.5
 - [ ] Add testing for card class

@@ -8,10 +8,17 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += c++14 static
+CONFIG += c++14
 INCLUDEPATH += headers
 
-TARGET = cards-500
+# Define major/minor builds
+# Build # and date are automatically calculated
+MAJOR_VERSION=0
+MINOR_VERSION=1
+BUILD_NUM = $$system(./buildNumber)
+DEFINES += MAJOR_VERSION=$${MAJOR_VERSION} MINOR_VERSION=$${MINOR_VERSION} BUILD_NUMBER=$${BUILD_NUM}
+
+TARGET = cards-500-$${MAJOR_VERSION}.$${MINOR_VERSION}
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use

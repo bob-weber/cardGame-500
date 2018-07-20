@@ -120,7 +120,7 @@ Deck::Deck(DeckType deckType, unsigned int numOfJokers, unsigned int numOfDecks,
 
 Deck::~Deck()
 {
-	for (unsigned int i; i < m_totalCardCount; i++)
+	for (unsigned int i = 0; i < m_totalCardCount; i++)
 	{
 		delete[] m_deck[i];
 	}
