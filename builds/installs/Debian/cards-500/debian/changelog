@@ -1,0 +1,11 @@
+cards-500 (0.1) UNRELEASED; urgency=medium
+
+  * Initial release. Initial debian package.
+
+ -- bob <bob@theWeberVenture.com>  Thu, 19 Jul 2018 21:39:32 -0700
+
+cards-500 (0.1) unstable; urgency=medium
+
+  * Initial Release.
+
+ -- bob <bob@theWeberVenture.com>  Thu, 19 Jul 2018 21:22:09 -0700

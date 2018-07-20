@@ -1,0 +1,15 @@
+Source: cards-500
+Section: unknown
+Priority: optional
+Maintainer: bob <bob@theWeberVenture.com>
+Build-Depends: debhelper (>= 10)
+Standards-Version: 4.1.2
+Homepage: https://github.com/bob-weber/cardGame-500
+Vcs-Git: git@github.com:bob-weber/cardGame-500.git
+#Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/cards-500.git
+
+Package: cards-500
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends} libqt5core5a (>= 5.9.0~beta), libqt5gui5 (>= 5.2.0), libqt5widgets5 (>= 5.0.2)
+Description: Card game 500
+ Plays the card game "500"
