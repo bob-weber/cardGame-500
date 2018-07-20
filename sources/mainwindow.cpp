@@ -399,7 +399,7 @@ void MainWindow::on_actionAbout_triggered()
 	QString versionMsg   = QString("Version %1.%2.%3").arg(MAJOR_VERSION).arg(MINOR_VERSION).arg(BUILD_NUMBER);
 	QString dateMsg      = "Build date: " + QString(__DATE__);
 	QString timeMsg      = "Build time: " + QString(__TIME__);
-	QString developerMsg = QString("Devloper: Bob Weber\nemail: bob@theWeberVenture.com\nWebsite: https://theWeberVenture.com");
+	QString developerMsg = QString("Developer: Bob Weber\nemail: bob@theWeberVenture.com\nWebsite: https://theWeberVenture.com");
 	QString aboutMsg = versionMsg + "\n" + dateMsg + "\n" + timeMsg + "\n\n" + developerMsg;
 	helpMsg.setText(aboutMsg);
 
