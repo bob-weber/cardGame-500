@@ -5,15 +5,10 @@
 
 using namespace std;
 
-// Declare our deck's back image
-// There's only one image used for all cards
-QImage Card::m_backImage;
-
 Card::Card(Card::Pip pip, Card::Suit suit, Card::Orientation orientation)
 {
 	this->m_suit = suit;
 	this->m_pip = pip;
-	this->m_orientation = orientation;
 
 	// Set this card's face image
 	//cout << "Card " << Print() << ", imagePath=" << GetCardImagePath(pip, suit) << endl;
@@ -21,13 +16,12 @@ Card::Card(Card::Pip pip, Card::Suit suit, Card::Orientation orientation)
 	QImage image = QImage(pathStr);
 	QSize imageSize = image.size() / m_imageSizeDivisor;
 	this->m_faceImage = image.scaled(imageSize);
-	this->m_Selected = false;		// Start of not raised up
 
 	/* Sorting value is ordered with spades as the lowest, then clubs, diamonds, and hearts.
 	 * Jokers are the highest.
 	 * Aces are sorted above Kings, not as 1s.
 	 */
-	this->m_sortValue = (uint)pip + ((uint)suit * (uint)PIP_NUMBER_OF_PIPS);
+	this->m_sortValue = uint(pip) + uint(suit) * uint(PIP_NUMBER_OF_PIPS);
 }
 
 Card::~Card()
@@ -44,50 +38,14 @@ Card::Pip Card::GetPip() const {
 	return this->m_pip;
 }
 
-Card::Orientation Card::GetOrientation() const {
-	return this->m_orientation;
-}
-
-void Card::SetOrientation(Orientation orientation) {
-	if (orientation != this->m_orientation) {
-		this->m_orientation = orientation;
-		emit OrientationChanged(orientation);
-	}
-}
-
-Card::Orientation Card::FlipOrientation()
-{
-	Orientation orientation = GetOrientation();
-	orientation = (orientation == FACE_DOWN) ? FACE_UP : FACE_DOWN;
-	SetOrientation(orientation);
-	return orientation;
-}
-
-QImage Card::GetBackImage() const
-{
-	return m_backImage;
-}
-
-void Card::SetBackImage()
-{
-	QImage image = QImage(m_cardBackImagePath);
-	QSize imageSize = image.size() / m_imageSizeDivisor;
-	m_backImage = image.scaled(imageSize);
-}
-
-bool Card::IsSelected() const
-{
-	return this->m_Selected;
-}
-
-void Card::SetSelected(bool raise)
-{
-	this->m_Selected = raise;
-}
-
 uint Card::GetSortValue() const
 {
 	return this->m_sortValue;
+}
+
+qreal Card::GetImageDivisor() const
+{
+	return this->m_imageSizeDivisor;
 }
 
 QImage Card::GetFaceImage()

@@ -1,5 +1,6 @@
 #include <QMessageBox>
 
+#include "playcards.h"
 #include "deck.h"
 #include "player.h"
 #include "game_500_settings.h"
@@ -32,7 +33,7 @@ void logic::SetupTable()
 
 	// Deal cards so we replace the label text with the card images.
 	m_dealer = 0;
-	DealCards();
+	NewGame();
 
 	// Game is idle until the player takes some action
 	m_gameState = GAME_IDLE;
@@ -79,11 +80,12 @@ void logic::NewHand()
 
 	m_deck->Shuffle();
 	DealCards();
-	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
+	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS_TO_DEAL; playerIndex++)
 	{
 		m_players[playerIndex]->SortHand();
 		m_players[playerIndex]->RefreshHand();
 	}
+
 	GetBids();
 }
 
@@ -136,24 +138,31 @@ void logic::MergeKittyWithHand()
 	// Pass the card selection siganl to mergeCards, so it knows to check how many cards are selected.
 	connect(this, &logic::CardSelectionChanged, mergeCards, &MergeCards::UpdateCardSelection);
 
-	connect(mergeCards, &MergeCards::MergingComplete, this, &logic::MergeComplete);
+	connect(mergeCards, &MergeCards::MergingComplete, this, &logic::PlayHand);
 
 	// Start the merge
 	mergeCards->StartMerge(m_players[m_currentBid->GetPlayerId()], m_players[KITTY_INDEX]);
 }
 
-void logic::MergeComplete()
+void logic::PlayHand()
 {
 	m_gameState = GAME_PLAY_HAND;
+
+	PlayCards* playCards = new PlayCards(m_players, m_currentBid);
+	connect(this, &logic::CardSelectionChanged, playCards, &PlayCards::CardSelected);
+	playCards->PlayHand();
+}
+
+void logic::ScoreHand()
+{
+	m_gameState = GAME_SCORE;
 
 }
 
 void logic::UpdateCardSelection(uint playerId, uint cardId)
 {
-	Q_UNUSED(playerId);
-	Q_UNUSED(cardId);
 	// Re-emit for subtasks
-	emit CardSelectionChanged();
+	emit CardSelectionChanged(playerId, cardId);
 }
 
 void logic::UpdateCardOrientation(uint playerId, uint cardId)
@@ -172,12 +181,12 @@ void logic::DealCards()
 	uint cardIndex = 0;
 	while (cardIndex < m_deck->GetTotalCardCount())
 	{
-		m_players[playerIndex]->AddCard(m_deck->GetNextCard());
+		m_players[playerIndex]->AddCard(m_deck->GetNextCard(), Card::FACE_DOWN);
 		++cardIndex;
 
 		// Advance to the next player
 		// We include the kitty in this sequence, but if it's not time to deal to the kitty, we'll skip it.
-		playerIndex = advanceIndex(playerIndex, NUM_OF_HANDS);
+		playerIndex = advanceIndex(playerIndex, NUM_OF_HANDS_TO_DEAL);
 		if (playerIndex == KITTY_INDEX)
 		{	// Next index is to deal to the kitty
 			if (dealToKittyThisPass)
@@ -188,7 +197,7 @@ void logic::DealCards()
 			else
 			{	// We're not going to deal to the kitty
 				// Advance the pointer again, past the kitty
-				playerIndex = advanceIndex(playerIndex, NUM_OF_HANDS);
+				playerIndex = advanceIndex(playerIndex, NUM_OF_HANDS_TO_DEAL);
 				// Set the flag for the next pass.
 				dealToKittyThisPass = true;
 			}

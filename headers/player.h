@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "card.h"
+#include "bid.h"
 
 class Player : public QObject
 {
@@ -56,138 +57,130 @@ class Player : public QObject
 		void SetNumOfSelectedCards(uint);
 
 		/******************************************************************************************************************
-		 * Adds a card to this player's hand.
-		 *
-		 * It searches the hand to see if there's room. If there is, the pointer to this
-		 * card is copied to this hand, and a signal is generated that adds this card to the UI.
-		 *
-		 * If the hand is full, a runtime exception is thrown.
+		 * Gets/sets the specified card's orientation, or flips it.
 		 *
 		 * Inputs:
-		 *	m_hand:	The array of card pointers that make up the player's hand.
-		 *	m_numOfCardsInHand: Incremented if a card is added to this hand.
-		 *
-		 * Outputs:
-		 *	Returns the index into the player's hand to which the card was added.
-		 *	if no empty slot is found, returns m_MaxNumOfCardsInHand, which is an invalid index.
-		 *
-		 * Exceptions:
-		 *	- Throws a logic error if m_numOfCardsInHand indicates there's an empty card slot, but we cannot find one in
-		 *		the hand.
-		 *	-	Throws a runtime error if we have no room in the hand for the new card.
-		 * Notes:
-		 ******************************************************************************************************************/
-		uint AddCard(Card *card);
-
-		/******************************************************************************************************************
-		 * Clears all cards from the hand. This means we set all card pointers to null.
-		 *
-		 * Inputs:	None
-		 *
-		 * Outputs:
-		 *	m_hand:	The array of card pointers that make up the player's hand are set to null.
-		 *	m_numOfCardsInHand: Cleared to 0, since we've turned in all of the cards.
-		 *
-		 * Exceptions:
-		 *
-		 * Notes:
-		 ******************************************************************************************************************/
-		void RemoveAllCards();
-
-		/******************************************************************************************************************
-		 * Sets the specified card's orientation.
-		 * Emits a signal to update the GUI for this card.
-		 *
-		 * Inputs:
-		 *	 cardId:			The card to modify.
+		 *	 cardPos:			The position of the card in the player's hand
 		 *	 orientation:	The orientation to set the card to.
 		 *
 		 * Outputs:
 		 *	m_hand:	The specified card in the hand has it's orientation field udpated.
+		 *
+		 * Notes:
+		 *   1. Emits a signal to update the GUI
 		 ******************************************************************************************************************/
-		void SetCardOrientation(uint cardId, Card::Orientation orientation);
+		Card::Orientation GetCardOrientation(uint cardPos) const;
+		void SetCardOrientation(uint cardPos, Card::Orientation orientation);
+		void FlipCardOrientation(uint cardPos);
 
 		/******************************************************************************************************************
-		 * Toggles the specified card. Updates the counter that keeps track of how many cards are selected in this hand.
-		 * The GUI is updated by MainWindow. When a card is left-clicked, the GUI selects/deselects this card, and then
-		 * emits a signal to the game logic. The game logic will call this function to update the card's selection, and
-		 * update a count of the selected cards.
+		 * This is a convenience function that sets the specified orientation for all cards in a player's hand.
 		 *
 		 * Inputs:
-		 *	 card:		The card we want to select or deselect.
+		 *	 orientation:	The card we want to select or deselect.
 		 *
 		 * Outputs:
-		 *	 card:		The card's selection field is toggled.
-		 *	 m_numOfSelectedCards: Count of the number of selected cards in this hand.
+		 *	 m_hand[].orientaiton:	Card's orientation is updated.
 		 ******************************************************************************************************************/
-		void ToggleCardSelection(Card* card);
+		void SetHandOrietation(Card::Orientation orientation);
+
+		/******************************************************************************************************************
+		 * Gets/sets the specified card's selection, or toggles it.
+		 *
+		 * Inputs:
+		 *	 cardPos:			The position of the card in the player's hand
+		 *	 isSelected:	When the card is/should be selected.
+		 *
+		 * Outputs:
+		 *	 m_hand:	The specified card in the hand has it's orientation field udpated.
+		 *
+		 * Notes:
+		 *   SetCardSelection emits a signal to update the GUI
+		 *   Using that function or ToggleCardSelection will result in a count of the number of selected cards being
+		 *   maintained, and the GUI being updated.
+		 *   ONLY USE THESE FUNCTINOS to change a card's selection.
+		 ******************************************************************************************************************/
+		bool IsCardSelected(uint cardPos) const;
+		void SetCardSelection(uint cardPos, bool isSelected);
+		void ToggleCardSelection(uint cardPos);
 
 		/******************************************************************************************************************
 		 * A convenience function that deslects all cards. and zeroes out the player's selected card counter.
 		 * A signal is emitted to update the GUI for each card.
 		 *
-		 * This function was created so that signals to update the GUI for cards are generated by Player.
-		 *
 		 * Inputs:
 		 *	 m_hand:	Cards in the player's hand are all deselected.
 		 *
 		 * Outputs:
-		 *	 card:		The card's selection field is set false.
-		 *	 m_numOfSelectedCards: Reset to 0.
+		 *	 m_hand[].isSelected:	 The card's selection status.
+		 *	 m_numOfSelectedCards: Reset to 0. This shouldn't be necessary if the counter is maintained properly, but it
+		 *                         may be a good idea to reset it when we know it's 0.
 		 ******************************************************************************************************************/
 		void DeselectAllCards();
 
 		/******************************************************************************************************************
-		 * Swaps 2 cards between 2 player's hands, this player, and player2.
+		 * Counts how many cards are in the hand for each suit. This helps the game logic determine what plays are valid.
 		 *
 		 * Inputs:
-		 *	 m_hand:				This player's hand
-		 *	 cardId:				The card in the player's hand to swap.
-		 *   player2:				The other player to swap with.
-		 *   player2CardId:	The card in the 2nd player's hand to swap with.
+		 *	 trumpSuit:	The suit of trump. This determines which suit the jacks are counted under.
 		 *
 		 * Outputs:
-		 *	m_hand in each player's hand is updated.
+		 *	m_numOfSuits[], an array of counters for each suit, is updated.
+		 *
+		 * Notes:
+		 *	- This function is not run automatically after cards are dealt or merged. It's up to the game logic to call
+		 *		this function before starting play for a hand.
+		 ******************************************************************************************************************/
+		void CountSuits(Bid::bidSuitT trumpSuit);
+
+		/******************************************************************************************************************
+		 * Returns the number of cards of the specified suit in the player's hand.
+		 *
+		 * Inputs:
+		 *	 suit:	The suit to check
+		 *
+		 * Outputs:
+		 *	 Returns the number of cards in the players hand of the specified suit.
 		 *
 		 * Notes:
 		 ******************************************************************************************************************/
-		void SwapCards(uint cardId, Player* player2, uint player2cardId);
+		uint GetSuitCount(Card::Suit suit);
+
+		/******************************************************************************************************************
+		 * Determines the suit of a card, which can be different that the card's printed suit due to the trump suit and
+		 * bowers.
+		 *
+		 * Inputs
+		 *	 card:	The card to determine the suit for.
+		 *   trumpSuit:	The trump suit for this hand.
+		 *
+		 * Outputs
+		 *	 Returns the card's suit after taking the bid into consideration.
+		 *
+		 * Notes:
+		 ******************************************************************************************************************/
+		Card::Suit GetTrumpSuit(Card *card, Bid::bidSuitT trumpSuit);
 
 		/******************************************************************************************************************
 		 * Sorts the cards in a player's hand. It retrieves the "sort value" of each card, and swaps them so they are
 		 * in increasing order. The sorting is done in place.
 		 *
 		 * Inputs:
-		 *	 m_hand:	The player's hand of cards.
+		 *	 m_hand[]:	The player's hand of cards.
 		 *
 		 * Outputs:
-		 *	m_hand is updated.
+		 *	m_hand[] is updated.
 		 *
 		 * Notes:
 		 ******************************************************************************************************************/
 		void SortHand();
 
 		/******************************************************************************************************************
-		 * Get/set a card in the player's hand.
-		 *
-		 * Inputs:
-		 *	 cardIndex:	The card in the hand to set or get.
-		 *	 card: When setting, the card to set.
-		 *
-		 * Outputs:
-		 *	m_hand is updated.
-		 *
-		 * Notes:
-		 ******************************************************************************************************************/
-		Card *GetCard(uint cardIndex);
-		void SetCard(uint cardIndex, Card* card);
-
-		/******************************************************************************************************************
-		 * Updates the talbe GUI for the given hand. This is hand after you've manipulated the cards, say with sorting,
+		 * Updates the table GUI for the given hand. This is hand after you've manipulated the cards, say with sorting,
 		 * and didn't update after each card change.
 		 *
 		 * The design approach is to always update the table through Player, since this class knows where each card is
-		 * located.
+		 * located. Don't change a card's oritation, selection or card through the Card class, only this Player class.
 		 *
 		 * Inputs:
 		 *	 m_hand:	A signal is emitted for each card in the player's hand.
@@ -212,6 +205,75 @@ class Player : public QObject
 		 ******************************************************************************************************************/
 		void PrintHand();
 
+		/******************************************************************************************************************
+		 * Adds a card to this player's hand. It verifies there's room in the hand, and if so, searches for an empty
+		 * location to place the card.
+		 *
+		 * If the hand is full, a runtime exception is thrown.
+		 *
+		 * Inputs:
+		 *	 card:	The card to add to the hand.
+		 *   orientation: Whether to set the card face up or face down.
+		 *
+		 * Outputs:
+		 *	 Returns the index into the player's hand to which the card was added.
+		 *	 if no empty slot is found, returns m_MaxNumOfCardsInHand, which is an invalid index.
+		 *
+		 *   Updates the cards position in m_hand[].
+		 *
+		 * Exceptions:
+		 *	- Throws a logic error if m_numOfCardsInHand indicates there's an empty card slot, but we cannot find one in
+		 *		the hand.
+		 *	-	Throws a runtime error if we have no room in the hand for the new card.
+		 * Notes:
+		 ******************************************************************************************************************/
+		uint AddCard(Card *card, Card::Orientation orientation);
+
+		/******************************************************************************************************************
+		 * Clears all cards from the hand. This means we set all card pointers to null.
+		 *
+		 * Inputs:	None
+		 *
+		 * Outputs:
+		 *	m_hand:	The array of card pointers that make up the player's hand are set to null.
+		 *	m_numOfCardsInHand: Cleared tSetCardOrientationo 0, since we've turned in all of the cards.
+		 *
+		 * Exceptions:
+		 *
+		 * Notes:
+		 ******************************************************************************************************************/
+		void RemoveAllCards();
+
+		/******************************************************************************************************************
+		 * Get/set a card in the player's hand.
+		 *
+		 * Inputs:
+		 *	 cardIndex:	The card in the hand to set or get.
+		 *	 card: When setting, the card to set.
+		 *
+		 * Outputs:
+		 *	 m_hand[] is updated.
+		 *
+		 * Notes:
+		 ******************************************************************************************************************/
+		Card *GetCard(uint cardIndex);
+		void SetCard(uint cardIndex, Card* card);
+
+		/******************************************************************************************************************
+		 * Swaps 2 cards between 2 player's hands, this player, and player2.
+		 *
+		 * Inputs:
+		 *	 cardId:				The card in the player's hand to swap
+		 *   player2:				The other player to swap with
+		 *   player2CardId:	The card in the 2nd player's hand to swap
+		 *
+		 * Outputs:
+		 *	m_hand[].card:	Each player's hand is updated.
+		 *
+		 * Notes:
+		 ******************************************************************************************************************/
+		void SwapCards(uint cardId, Player* player2, uint player2cardId);
+
 	signals:
 		/******************************************************************************************************************
 		 * Signal emitted to update a player's card on the table GUI.
@@ -225,16 +287,6 @@ class Player : public QObject
 	public slots:
 
 	private:
-
-		uint m_playerId;				// Id of this player
-		uint m_teamId;
-		QString m_playerName;
-		uint m_currentNumOfCards;
-		uint m_maxNumOfCards;
-		uint m_cardRotation;
-		Card **m_hand;					// Array of card ptrs for the cards in the hand
-		uint m_numOfSelectedCards;
-
 		/******************************************************************************************************************
 		 * Find an empty card slot in a player's hand.
 		 *
@@ -249,6 +301,25 @@ class Player : public QObject
 		 ******************************************************************************************************************/
 		unsigned int FindEmptyHandSlot();
 
+		uint m_playerId;				// Id of this player
+		uint m_teamId;					// Which team this player belongs to
+		QString m_playerName;		// Player name
+		uint m_currentNumOfCards;	// Number of cards in the player's hand
+		uint m_maxNumOfCards;			// Max number of cards this player can have
+		uint m_cardRotation;			// Rotation of the card
+		uint m_numOfSelectedCards;	// Num of cards selected. This is useful for some of the game logic.
+		uint m_numOfSuits[Card::SUIT_NUMBER_OF_SUITS];	// How many cards of each suit
+
+		/* For each card position on the table, we need to know what card,
+		 * It's orientation, and selection.
+		 */
+		typedef struct
+		{
+			bool isSelected;
+			Card::Orientation orientation;
+			Card* card;
+		} HandT;
+		HandT m_hand[NUM_OF_CARDS_PER_PLAYER];
 };
 
 #endif // PLAYER_H

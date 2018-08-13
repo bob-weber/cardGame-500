@@ -58,7 +58,7 @@ Deck::Deck(DeckType deckType, unsigned int numOfJokers, unsigned int numOfDecks,
 				default:
 					// Invalid deck specified. Logic error.
 					throw invalid_argument("Unhandled deck type");
-					break;
+					//break;
 			}
 
 			if (createCard)
@@ -110,7 +110,14 @@ Deck::Deck(DeckType deckType, unsigned int numOfJokers, unsigned int numOfDecks,
 
 		// Set the deck's backside image
 		// This is a static class variable, so using any card will work.
-		m_deck[0]->SetBackImage();
+		SetBackImage("blue_solid.svg");
+
+		// Set the "no card" image
+		QImage image = QImage(m_deckImageePath + "empty_card.svg");
+		QSize imageSize = image.size();
+		imageSize /= m_deck[0]->GetImageDivisor();
+		m_noCardImage = image.scaled(imageSize);
+
 	}
 	// else, no cards needed for this deck.
 
@@ -122,7 +129,7 @@ Deck::~Deck()
 {
 	for (unsigned int i = 0; i < m_totalCardCount; i++)
 	{
-		delete[] m_deck[i];
+		delete m_deck[i];
 	}
 	delete[] m_deck;
 }
@@ -132,7 +139,7 @@ void Deck::Shuffle()
 	// From https://www.geeksforgeeks.org/shuffle-a-given-array/
 	// Use a different seed value so that we don't get same
 	// result each time we run this program
-	srand(time(NULL));
+	srand(time(nullptr));
 
 	// Start from the last element and swap one by one. We don't
 	// need to run for the first element that's why i > 0
@@ -162,6 +169,24 @@ Card *Deck::GetNextCard()
 	return card;
 }
 
+
+QImage Deck::GetBackImage() const
+{
+	return m_backImage;
+}
+
+void Deck::SetBackImage(QString backImage)
+{
+	QImage image = QImage(m_deckImageePath + backImage);
+	QSize imageSize = image.size();
+	imageSize /= m_deck[0]->GetImageDivisor();
+	m_backImage = image.scaled(imageSize);
+}
+
+QImage Deck::GetNoCardImage() const
+{
+	return m_noCardImage;
+}
 
 void Deck::Print()
 {

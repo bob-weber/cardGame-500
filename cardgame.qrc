@@ -225,5 +225,6 @@
         <file>resources/Suits/heart.svg</file>
         <file>resources/Suits/no_trump.svg</file>
         <file>resources/Suits/spade.svg</file>
+        <file>resources/cardImages/cards-compact/backs/empty_card.svg</file>
     </qresource>
 </RCC>

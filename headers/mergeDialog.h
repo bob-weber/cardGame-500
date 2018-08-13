@@ -12,7 +12,7 @@ class MergeDialog : public QDialog
 		Q_OBJECT
 
 	public:
-		explicit MergeDialog(uint numOfPlayerCardsSelected, uint numOfKittyCardsSelected, QWidget *parent = 0);
+		explicit MergeDialog(uint numOfPlayerCardsSelected, uint numOfKittyCardsSelected, QWidget *parent = nullptr);
 		~MergeDialog();
 
 	public slots:

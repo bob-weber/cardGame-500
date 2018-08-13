@@ -1,8 +1,9 @@
 #include <QObject>
-#include "../headers/game_500_settings.h"
-#include "../headers/bid.h"
+#include "game_500_settings.h"
+#include "bid.h"
+#include "card.h"
 
-#include "../headers/score.h"
+#include "score.h"
 
 // Initialize our static array of bidding scores
 const int Score::bidScore[Bid::BID_NUM_OF_SUITS][NUM_OF_CARDS_PER_PLAYER] =
@@ -67,4 +68,9 @@ int Score::GetTeamScore(uint teamId)
 		score = m_teamScore[teamId];
 	}
 	return score;
+}
+
+int Score::GetCardScore(Card* card, Bid::bidSuitT trumpSuit)
+{
+
 }

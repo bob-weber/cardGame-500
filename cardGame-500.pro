@@ -14,7 +14,7 @@ INCLUDEPATH += headers
 # Define major/minor builds
 # Build # and date are automatically calculated
 MAJOR_VERSION=0
-MINOR_VERSION=1
+MINOR_VERSION=2
 BUILD_NUM = $$system(./buildNumber)
 DEFINES += MAJOR_VERSION=$${MAJOR_VERSION} MINOR_VERSION=$${MINOR_VERSION} BUILD_NUMBER=$${BUILD_NUM}
 
@@ -47,7 +47,9 @@ SOURCES += \
     sources/mergecards.cpp \
     sources/score.cpp \
     sources/bidding.cpp \
-    sources/mergeDialog.cpp
+    sources/mergeDialog.cpp \
+    sources/playcards.cpp \
+    sources/selectCardDialog.cpp
 
 HEADERS += \
     headers/card.h \
@@ -63,12 +65,15 @@ HEADERS += \
     headers/bidding.h \
     headers/score.h \
     headers/game_500_settings.h \
-    headers/mergeDialog.h
+    headers/mergeDialog.h \
+    headers/playcards.h \
+    headers/selectCardDialog.h
 
 FORMS += \
     mainwindow.ui \
     user_bid_dialog.ui \
-    mergeDialog.ui
+    mergeDialog.ui \
+    selectCardDialog.ui
 
 RESOURCES += \
     cardgame.qrc

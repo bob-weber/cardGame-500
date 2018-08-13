@@ -691,6 +691,20 @@
         </property>
        </widget>
       </item>
+      <item row="8" column="9">
+       <widget class="ClickableQLabel" name="lbl_P1Play">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="9">
+       <widget class="ClickableQLabel" name="lbl_P3Play">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>

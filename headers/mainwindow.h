@@ -71,9 +71,10 @@ class MainWindow : public QMainWindow
 		  // ---------  -------------  -------	------------
 		  { "Kathy",               0,       1,  NUM_OF_CARDS_PER_PLAYER },
 		  { "Theodore",           90,       2,  NUM_OF_CARDS_PER_PLAYER },
-		  { "Priya",             180,       1,  NUM_OF_CARDS_PER_PLAYER	},
+		  { "Priya",               0,       1,  NUM_OF_CARDS_PER_PLAYER	},
 		  { "Edward",            270,       2,  NUM_OF_CARDS_PER_PLAYER	},
-		  { "Kitty",               0,       0,  NUM_OF_CARDS_IN_KITTY		}
+		  { "Kitty",               0,       0,  NUM_OF_CARDS_IN_KITTY		},
+		  { "PlayArea",            0,       0,  NUM_OF_CARDS_TO_PLAY		}
 		};
 
 		/******************************************************************************************************************

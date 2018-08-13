@@ -66,14 +66,27 @@ MainWindow::CardMappingT MainWindow::cardLabelMapping[NUM_OF_HANDS][NUM_OF_CARDS
     { "lbl_P4C10", nullptr },
   },
 
-  {	// Player 4
+  {	// Kitty/Card Play
     { "lbl_KittyC1",  nullptr },
     { "lbl_KittyC2",  nullptr },
     { "lbl_KittyC3",  nullptr },
     { "lbl_KittyC4",  nullptr },
     { "lbl_KittyC5",  nullptr },
+    { "lbl_P1Play",   nullptr },
+    { "lbl_P3Play",   nullptr },
     { "",             nullptr },
     { "",             nullptr },
+    { "",             nullptr },
+  },
+
+  {	// Card Play
+    { "lbl_P1Play",		nullptr },
+    { "lbl_KittyC2",  nullptr },
+    { "lbl_P3Play",		nullptr },
+    { "lbl_KittyC4",  nullptr },
+    { "",							nullptr },
+    { "",							nullptr },
+    { "",							nullptr },
     { "",             nullptr },
     { "",             nullptr },
     { "",             nullptr },
@@ -108,8 +121,11 @@ MainWindow::MainWindow(QWidget *parent) :
 		m_player[playerId]->SetNumOfSelectedCards(0);
 
 		// Update the GUI with the player's info
-		SetPlayerName(playerId, m_player[playerId]->GetPlayerName());
-		SetPlayerAction(playerId, "");
+		if (playerId < NUM_OF_PLAYERS)
+		{	// This is an actual player, not the kitty or play area
+			SetPlayerName(playerId, m_player[playerId]->GetPlayerName());
+			SetPlayerAction(playerId, "");
+		}
 
 		// Connect changes to this player's hand to a function to update the card on the table
 		connect(m_player[playerId], &Player::CardChanged, this, &MainWindow::UpdateCard);
@@ -186,6 +202,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->lbl_KittyC3, &ClickableQLabel::cardClicked, this, &MainWindow::UpdateClickedCard);
 	connect(ui->lbl_KittyC4, &ClickableQLabel::cardClicked, this, &MainWindow::UpdateClickedCard);
 	connect(ui->lbl_KittyC5, &ClickableQLabel::cardClicked, this, &MainWindow::UpdateClickedCard);
+
+	connect(ui->lbl_P1Play, &ClickableQLabel::cardClicked, this, &MainWindow::UpdateClickedCard);
+	connect(ui->lbl_P3Play, &ClickableQLabel::cardClicked, this, &MainWindow::UpdateClickedCard);
 
 	connect(this, &MainWindow::CardSelectionChanged,   gameLogic, &logic::UpdateCardSelection);
 	connect(this, &MainWindow::CardOrientationChanged, gameLogic, &logic::UpdateCardOrientation);
@@ -286,44 +305,59 @@ void MainWindow::UpdateCard(uint playerId, uint cardId)
 {
 	static QLabel* lblCardPtrs[NUM_OF_HANDS][NUM_OF_CARDS_PER_PLAYER] =
 	{
-	  {	ui->lbl_P1C1, ui->lbl_P1C2, ui->lbl_P1C3, ui->lbl_P1C4, ui->lbl_P1C5, ui->lbl_P1C6, ui->lbl_P1C7, ui->lbl_P1C8, ui->lbl_P1C9, ui->lbl_P1C10 	},	// Player 1
-	  {	ui->lbl_P2C1, ui->lbl_P2C2, ui->lbl_P2C3, ui->lbl_P2C4, ui->lbl_P2C5, ui->lbl_P2C6, ui->lbl_P2C7, ui->lbl_P2C8, ui->lbl_P2C9, ui->lbl_P2C10 	},	// Player 2
-	  {	ui->lbl_P3C1, ui->lbl_P3C2, ui->lbl_P3C3, ui->lbl_P3C4, ui->lbl_P3C5, ui->lbl_P3C6, ui->lbl_P3C7, ui->lbl_P3C8, ui->lbl_P3C9, ui->lbl_P3C10 	},	// Player 3
-	  {	ui->lbl_P4C1, ui->lbl_P4C2, ui->lbl_P4C3, ui->lbl_P4C4, ui->lbl_P4C5, ui->lbl_P4C6, ui->lbl_P4C7, ui->lbl_P4C8, ui->lbl_P4C9, ui->lbl_P4C10 	},	// Player 4
-	  {	ui->lbl_KittyC1, ui->lbl_KittyC2, ui->lbl_KittyC3, ui->lbl_KittyC4, ui->lbl_KittyC5, nullptr, nullptr, nullptr, nullptr, nullptr }	// kitty
+	  {	ui->lbl_P1C1,    ui->lbl_P1C2,    ui->lbl_P1C3,    ui->lbl_P1C4,    ui->lbl_P1C5,    ui->lbl_P1C6,   ui->lbl_P1C7,   ui->lbl_P1C8, ui->lbl_P1C9, ui->lbl_P1C10 	}, // Player 1
+	  {	ui->lbl_P2C1,    ui->lbl_P2C2,    ui->lbl_P2C3,    ui->lbl_P2C4,    ui->lbl_P2C5,    ui->lbl_P2C6,   ui->lbl_P2C7,   ui->lbl_P2C8, ui->lbl_P2C9, ui->lbl_P2C10 	}, // Player 2
+	  {	ui->lbl_P3C1,    ui->lbl_P3C2,    ui->lbl_P3C3,    ui->lbl_P3C4,    ui->lbl_P3C5,    ui->lbl_P3C6,   ui->lbl_P3C7,   ui->lbl_P3C8, ui->lbl_P3C9, ui->lbl_P3C10 	}, // Player 3
+	  {	ui->lbl_P4C1,    ui->lbl_P4C2,    ui->lbl_P4C3,    ui->lbl_P4C4,    ui->lbl_P4C5,    ui->lbl_P4C6,   ui->lbl_P4C7,   ui->lbl_P4C8, ui->lbl_P4C9, ui->lbl_P4C10 	}, // Player 4
+	  {	ui->lbl_KittyC1, ui->lbl_KittyC2, ui->lbl_KittyC3, ui->lbl_KittyC4, ui->lbl_KittyC5, nullptr,        nullptr,        nullptr,      nullptr,      nullptr        },  // kitty
+	  {	ui->lbl_P1Play,  ui->lbl_KittyC2, ui->lbl_P3Play,  ui->lbl_KittyC4, nullptr,         nullptr,        nullptr,        nullptr,      nullptr,      nullptr        }  // Play area
 	};
+
 	if ((playerId < NUM_OF_HANDS) && (cardId < NUM_OF_CARDS_PER_PLAYER))
 	{
-		// Get the card we want to update, and it's location on the table
 		QLabel *label = lblCardPtrs[playerId][cardId];
-		Player *player = m_player[playerId];
-		Card *card = player->GetCard(cardId);
+		if (label != nullptr)
+		{	// This is a valid location to place a card
+			Player *player = m_player[playerId];
+			Card *card = player->GetCard(cardId);
+			QImage cardImage;
 
-		if ((label != nullptr) && (card != nullptr))
-		{	// We have a valid card, and a valid location to update
-			// Rotate the image
-			QMatrix matrix;
-			matrix.rotate(player->GetCardRotation());
-			QImage rotatedImage;
-			if (card->GetOrientation() == Card::FACE_DOWN) {
-				rotatedImage = card->GetBackImage();
-			}
-			else {
-				rotatedImage = card->GetFaceImage();
-			}
-			rotatedImage = rotatedImage.transformed(matrix);
-			label->setPixmap(QPixmap::fromImage(rotatedImage));	// Update the image on the screen
+			if (card != nullptr)
+			{	// There's a card to display
+				if (player->GetCardOrientation(cardId) == Card::FACE_DOWN) {
+					cardImage = m_deck->GetBackImage();
+				}
+				else {
+					cardImage = card->GetFaceImage();
+				}
 
-			if (card->IsSelected())
-			{	// Raise the card
-				label->setLineWidth(3);
-				label->setFrameStyle(QFrame::Box /*| QFrame::NoFrame*/ | QFrame::Raised);
+				if (player->IsCardSelected(cardId))
+				{	// Raise the card
+					label->setLineWidth(3);
+					label->setFrameStyle(QFrame::Box /*| QFrame::NoFrame*/ | QFrame::Raised);
+				}
+				else
+				{	// Lower it
+					label->setLineWidth(0);
+					label->setFrameStyle(QFrame::Panel);
+				}
 			}
 			else
-			{	// Lower it
+			{	// No card at this valid location
+				// Set the image to the transparent card
+				cardImage = m_deck->GetNoCardImage();
+				// Remove any selection for this card
 				label->setLineWidth(0);
 				label->setFrameStyle(QFrame::Panel);
 			}
+
+			// Rotate the image for this player
+			QMatrix matrix;
+			matrix.rotate(player->GetCardRotation());
+			cardImage = cardImage.transformed(matrix);
+
+			// Update the image on the tablem_leadPlayer
+			label->setPixmap(QPixmap::fromImage(cardImage));
 		}
 		// else we don't have this label on the table top
 	}
@@ -343,19 +377,18 @@ void MainWindow::UpdateClickedCard(QString labelName, Qt::MouseButtons buttons)
 	if ((playerId < NUM_OF_HANDS) && (cardId < NUM_OF_CARDS_PER_PLAYER))
 	{	// We found the clicked card
 		Player *player = m_player[playerId];
-		Card* card = player->GetCard(cardId);
 
 		if ((buttons & Qt::LeftButton) != 0)
 		{	// The left button was clicked
 			// Select or deselect the card
-			player->ToggleCardSelection(card);
+			player->ToggleCardSelection(cardId);
 			emit CardSelectionChanged(playerId, cardId);
 		}
 		else if ((buttons & Qt::RightButton) != 0)
 		{	// Right button clicked
 			// Flip the card
 			// Flip it, like normal.
-			card->FlipOrientation();
+			player->FlipCardOrientation(cardId);
 			emit CardOrientationChanged(playerId, cardId);
 		}
 		// else, some other button event that we ignore.
@@ -371,7 +404,7 @@ void MainWindow::FindCardWidget(QString labelName, uint* playerId, uint* cardId)
 	*playerId =  NUM_OF_HANDS;
 	*cardId   =  NUM_OF_CARDS_PER_PLAYER;
 
-	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS; playerIndex++)
+	for (uint playerIndex = 0; playerIndex < NUM_OF_HANDS_TO_DEAL; playerIndex++)
 	{
 		for (uint cardIndex = 0; cardIndex < NUM_OF_CARDS_PER_PLAYER; cardIndex++)
 		{

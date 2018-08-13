@@ -16,7 +16,7 @@ class MergeCards : public QObject
 		void StartMerge(Player* player, Player* kitty);
 
 	public slots:
-		void UpdateCardSelection();
+		void UpdateCardSelection(uint playerId, uint cardId);
 		void CompleteMerge();
 		void ResetMerging();
 

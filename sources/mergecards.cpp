@@ -19,14 +19,8 @@ void MergeCards::StartMerge(Player* player, Player* kitty)
 	m_kitty = kitty;
 
 	// Turn face-up every card in the players hand and kitty
-	for (uint cardIndex = 0; cardIndex < NUM_OF_CARDS_PER_PLAYER; cardIndex++)
-	{
-		m_player->SetCardOrientation(cardIndex, Card::FACE_UP);
-	}
-	for (uint cardIndex = 0; cardIndex < NUM_OF_CARDS_IN_KITTY; cardIndex++)
-	{
-		m_kitty->SetCardOrientation(cardIndex, Card::FACE_UP);
-	}
+	player->SetHandOrietation(Card::FACE_UP);
+	kitty->SetHandOrietation(Card::FACE_UP);
 
 	/* Pop up a dialog that explains how to merge the hand with the kitty.
 	 * It contains an Ok and Reset button.
@@ -67,17 +61,15 @@ void MergeCards::CompleteMerge()
 			Card* playerCard = m_player->GetCard(playerCardId);
 			if (playerCard != nullptr)
 			{
-				if (playerCard->IsSelected())
+				if (m_player->IsCardSelected(playerCardId))
 				{	// This card is selected
 					// Find the next card selected in the kitty
 					// Advance the kitty card index until it finds a valid, selected card
-					Card* kittyCard = m_kitty->GetCard(kittyCardId);
-					bool isSelected = kittyCard->IsSelected();
+					bool isSelected = m_kitty->IsCardSelected(kittyCardId);
 					while (!isSelected && (kittyCardId < NUM_OF_CARDS_IN_KITTY))
 					{
 						++kittyCardId;
-						kittyCard = m_kitty->GetCard(kittyCardId);
-						isSelected = kittyCard->IsSelected();
+						isSelected = m_kitty->IsCardSelected(kittyCardId);
 					}
 
 					if (kittyCardId < NUM_OF_CARDS_IN_KITTY)
@@ -116,38 +108,9 @@ void MergeCards::ResetMerging()
 	emit CheckSelectedNumOfCards(m_player->GetNumOfSelectedCards(), m_kitty->GetNumOfSelectedCards());
 }
 
-void MergeCards::UpdateCardSelection()
+void MergeCards::UpdateCardSelection(uint playerId, uint cardId)
 {
+	Q_UNUSED(playerId);
+	Q_UNUSED(cardId);
 	emit CheckSelectedNumOfCards(m_player->GetNumOfSelectedCards(), m_kitty->GetNumOfSelectedCards());
 }
-
-
-
-#if 0
-void MergeCards::CardSelectionChanged(uint playerId, bool cardIsRaised)
-{
-	if (playerId == KITTY_INDEX)
-	{	// This is the kitty, not a player's hand
-		if (cardIsRaised) {
-			++m_kittySelectedCardsCount;
-		}
-		else {
-			--m_kittySelectedCardsCount;
-		}
-	}
-	else
-	{	// This isn't the kitty
-		/* For this game, the only 2 choices are a player's hand or a kitty.
-		 * So, we don't need to verify that the playerId is the Id of the current bidder.
-		 * The caller wouldn't call us without checking this. If it's not the kitty, it
-		 * the winning bidder's hand.
-		 */
-		if (cardIsRaised) {
-			++m_playerSelectedCardsCount;
-		}
-		else {
-			--m_playerSelectedCardsCount;
-		}
-	}
-}
-#endif

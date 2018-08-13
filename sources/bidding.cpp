@@ -44,6 +44,7 @@ void Bidding::GetAllBids(uint dealer, Player** players)
 	m_nellowTeamId = NUM_OF_PLAYERS;	// invalid Id
 	m_completedBidCount = 0;
 
+	// Turn over the kitty so the
 	// start bidding to the left of the dealer
 	m_bidder = advanceIndex(m_bidder, NUM_OF_PLAYERS);
 
@@ -56,6 +57,9 @@ void Bidding::GetOneBid()
 	// Update the player status on the GUI
 	Player *player = m_players[m_bidder];
 	emit PlayerActionChanged(m_bidder, "Bidding");
+
+	// Set this player's cards face up
+	player->SetHandOrietation(Card::FACE_UP);
 
 	// Dialog to get the user bid
 	// Make it non-modal so the user can interface with the tabletop
@@ -176,7 +180,9 @@ void Bidding::VerifyPlayerBid(Bid* playerBid)
 		}
 		// else, this player passed
 
-		// This player is done. Advance to the next player
+		// This player is done.
+		// Turn over their cards and advance to the next player
+		player->SetHandOrietation(Card::FACE_DOWN);
 		++m_completedBidCount;
 		if (m_completedBidCount < NUM_OF_PLAYERS)
 		{	// We're not done

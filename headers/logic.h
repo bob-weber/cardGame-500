@@ -35,12 +35,12 @@ class logic : public QObject
 		void TeamScoreChanged(uint teamId, int teamScore);
 		void SetPlayerCard(uint playerId, uint cardIndex, Card* card, Player* player);
 		void GetPlayerBids(uint dealer, Player **playersInfo);
-		void CardSelectionChanged();
+		void CardSelectionChanged(uint playerId, uint cardId);
 
 	public slots:
 		void NewGame();
 		void BiddingComplete(Bid *bid);
-		void MergeComplete();
+		void PlayHand();
 		void UpdateCardSelection(uint playerId, uint CardId);
 		void UpdateCardOrientation(uint playerId, uint CardId);
 		//void UpdateCard_merge(uint playerId, uint CardId);
@@ -113,6 +113,8 @@ class logic : public QObject
 		 *
 		 * Notes:
 		 ******************************************************************************************************************/
+
+		void ScoreHand();
 
 		void TurnPlayersCards(uint playerId, Card::Orientation orientation);
 

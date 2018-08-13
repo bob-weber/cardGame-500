@@ -5,6 +5,8 @@
 
 #include "game_500_settings.h"
 #include "bid.h"
+#include "card.h"
+
 /**********************************************************************************************************************
  * This class manages the bidding score and team scores.
  **********************************************************************************************************************/
@@ -12,6 +14,10 @@
 class Score : public QObject
 {
 		Q_OBJECT
+
+		// Scoring order for trump suits
+		enum TrumpPip { TRUMP_2 = 0, TRUMP_3, TRUMP_4, TRUMP_5, TRUMP_6, TRUMP_7, TRUMP_8, TRUMP_9, TRUMP_10,
+			              TRUMP_QUEEN, TRUMP_KING, TRUMP_ACE, TRUMP_LEFT_BOWER, TRUMP_RIGHT_BOWER, TRUMP_JOKER };
 
 	public:
 		/******************************************************************************************************************
@@ -88,6 +94,11 @@ class Score : public QObject
 		 ******************************************************************************************************************/
 		int GetTeamScore(uint teamId);
 
+
+		/******************************************************************************************************************
+		 * TODO
+		 ******************************************************************************************************************/
+		int GetCardScore(Card *card, Bid::bidSuitT trumpSuit);
 
 	signals:
 

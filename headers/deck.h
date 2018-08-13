@@ -25,6 +25,15 @@ class Deck : public QObject
 		           READ GetTotalCardCount)
 		unsigned int GetTotalCardCount() const;
 
+		Q_PROPERTY(QImage m_backImage
+		           READ GetBackImage)
+		QImage GetBackImage() const;
+		void SetBackImage(QString backImage);
+
+		Q_PROPERTY(QImage m_noCardImage
+		           READ GetNoCardImage)
+		QImage GetNoCardImage() const;
+
 		/******************************************************************************************************************
 		 * Constructor that creates the specified deck.
 		 * Inputs:
@@ -111,6 +120,13 @@ class Deck : public QObject
 
 		Card **m_deck;			// The deck of cards
 		unsigned int m_drawIndex;		// The index from where we're draing cards
+
+		// Back and "no card" images. These are the same for the entire deck.
+		QImage m_backImage;
+		QImage m_noCardImage;
+		const QString m_deckImageePath = ":/resources/cardImages/cards-compact/backs/";
+//		const QString m_cardBackImagePath = ":/resources/cardImages/cards-compact/backs/blue_solid.svg";
+
 };
 
 #endif // DECK_H
