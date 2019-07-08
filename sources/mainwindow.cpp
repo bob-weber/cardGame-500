@@ -429,7 +429,7 @@ void MainWindow::on_actionAbout_triggered()
 	 * If you use setInformativeText, that text may wrap.
 	 * See http://apocalyptech.com/linux/qt/qmessagebox/
 	 */
-	QString versionMsg   = QString("Version %1.%2.%3").arg(MAJOR_VERSION).arg(MINOR_VERSION).arg(BUILD_NUMBER);
+    QString versionMsg   = QString("Version %1.%2.%3").arg(MAJOR_VERSION).arg(MINOR_VERSION).arg(BUILD_NUMBER);
 	QString dateMsg      = "Build date: " + QString(__DATE__);
 	QString timeMsg      = "Build time: " + QString(__TIME__);
 	QString developerMsg = QString("Developer: Bob Weber\nemail: bob@theWeberVenture.com\nWebsite: https://theWeberVenture.com");

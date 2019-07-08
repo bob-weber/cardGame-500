@@ -5,7 +5,7 @@
 
 using namespace std;
 
-Card::Card(Card::Pip pip, Card::Suit suit, Card::Orientation orientation)
+Card::Card(Card::Pip pip, Card::Suit suit)
 {
 	this->m_suit = suit;
 	this->m_pip = pip;

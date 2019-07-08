@@ -14,10 +14,17 @@ INCLUDEPATH += headers
 # Define major/minor builds
 # Build # and date are automatically calculated
 MAJOR_VERSION=0
-MINOR_VERSION=2
-BUILD_NUM = $$system(./buildNumber)
+MINOR_VERSION=3
+win32 {
+    message("Windows Build")
+    system(buildNumber_Windows.bat)
+    BUILD_NUM = $$system(type build_number)
+}
+unix {
+    message("Linux Build")
+    BUILD_NUM = $$system(./buildNumber)
+}
 DEFINES += MAJOR_VERSION=$${MAJOR_VERSION} MINOR_VERSION=$${MINOR_VERSION} BUILD_NUMBER=$${BUILD_NUM}
-
 TARGET = cards-500-$${MAJOR_VERSION}.$${MINOR_VERSION}
 TEMPLATE = app
 

@@ -55,14 +55,14 @@ uint Score::GetBidScore(uint numOfTricks, Bid::bidSuitT bidSuit)
 	    (bidSuit < Bid::BID_NUM_OF_SUITS))
 	{
 		// Note that the scoring table has no entry for 0 tricks. It starts at 1, so we need to -1 from # of tricks.
-		score = bidScore[bidSuit][numOfTricks-1];
+        score = uint(bidScore[bidSuit][numOfTricks-1]);
 	}
 	return score;
 }
 
 int Score::GetTeamScore(uint teamId)
 {
-	uint score = 0;
+    int score = 0;
 	if (teamId < NUM_OF_TEAMS)
 	{
 		score = m_teamScore[teamId];
@@ -72,5 +72,5 @@ int Score::GetTeamScore(uint teamId)
 
 int Score::GetCardScore(Card* card, Bid::bidSuitT trumpSuit)
 {
-
+    return 0;
 }

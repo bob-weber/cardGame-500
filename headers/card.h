@@ -54,8 +54,7 @@ class Card : public QObject
 		/** Construcors/destrucors
 		 * If no suit or PIP is specified, a 2 of spades will be created.
 		 */
-		explicit Card(Pip pip = PIP_2, Suit suit = SUIT_SPADE,
-		              Orientation orientation = FACE_DOWN);
+        explicit Card(Pip pip = PIP_2, Suit suit = SUIT_SPADE);
 		virtual ~Card();
 
 		// Convencience operators
